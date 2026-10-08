@@ -6,17 +6,27 @@ export interface FooterLink {
   href: string;
 }
 
+export interface HubFooterLabels {
+  source: string;
+  portfolio: string;
+  allGames: string;
+}
+
+const DEFAULT_LABELS: HubFooterLabels = { source: 'Source', portfolio: 'Portfolio', allGames: 'All games' };
+
 export interface HubFooterProps {
   game: GameId | 'hub';
   links?: FooterLink[];
   note?: ReactNode;
+  labels?: Partial<HubFooterLabels>;
 }
 
-export function HubFooter({ game, links, note }: HubFooterProps) {
+export function HubFooter({ game, links, note, labels }: HubFooterProps) {
   const g = game === 'hub' ? HUB : getGame(game);
+  const text = { ...DEFAULT_LABELS, ...labels };
   const own = links ?? [
-    { label: 'Source', href: g.source },
-    { label: 'Portfolio', href: 'https://altterisk.github.io/portfolio/' },
+    { label: text.source, href: g.source },
+    { label: text.portfolio, href: 'https://altterisk.github.io/portfolio/' },
   ];
   return (
     <footer className="hub-footer" data-game={game}>
@@ -28,7 +38,7 @@ export function HubFooter({ game, links, note }: HubFooterProps) {
           ))}
         </div>
         <div className="hub-footer__row hub-footer__games">
-          {game !== 'hub' && <a href={HUB_URL}>All games</a>}
+          {game !== 'hub' && <a href={HUB_URL}>{text.allGames}</a>}
           {GAMES.filter((o) => o.id !== game).map((o) => (
             <a key={o.id} href={o.url}>{o.title}</a>
           ))}

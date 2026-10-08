@@ -6,12 +6,22 @@ export interface HomeLinkProps {
   children: ReactNode;
 }
 
+export interface HubBarLabels {
+  switchGame: string;
+  allGames: string;
+  here: string;
+}
+
+const DEFAULT_LABELS: HubBarLabels = { switchGame: 'Switch game', allGames: 'All games', here: 'here' };
+
 export interface HubBarProps {
   game: GameId | 'hub';
   logo?: ReactNode;
   nav?: ReactNode;
   actions?: ReactNode;
   renderHomeLink?: (props: HomeLinkProps) => ReactNode;
+  homeHref?: string;
+  labels?: Partial<HubBarLabels>;
 }
 
 export function GameMark({ accent }: { accent: string }) {
@@ -23,7 +33,7 @@ export function GameIcon({ game, size = 24, base = HUB_URL }: { game: Game; size
   return <img className="hub-icon" src={base + game.icon} alt="" width={size} height={size} loading="lazy" />;
 }
 
-function GameSwitcher({ game }: { game: GameId | 'hub' }) {
+function GameSwitcher({ game, homeHref, labels }: { game: GameId | 'hub'; homeHref: string; labels: HubBarLabels }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const listId = useId();
@@ -51,8 +61,8 @@ function GameSwitcher({ game }: { game: GameId | 'hub' }) {
         className="hub-switcher__button"
         aria-expanded={open}
         aria-controls={listId}
-        aria-label="Switch game"
-        title="Switch game"
+        aria-label={labels.switchGame}
+        title={labels.switchGame}
         onClick={() => setOpen((v) => !v)}
       >
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
@@ -61,14 +71,14 @@ function GameSwitcher({ game }: { game: GameId | 'hub' }) {
       </button>
       {open && (
         <div className="hub-switcher__panel" id={listId}>
-          <div className="hub-switcher__label">Switch game</div>
+          <div className="hub-switcher__label">{labels.switchGame}</div>
           <ul>
             {GAMES.map((g) => {
               const current = g.id === game;
               return (
                 <li key={g.id}>
                   <a
-                    href={current ? '/' : g.url}
+                    href={current ? homeHref : g.url}
                     className="hub-switcher__item"
                     aria-current={current ? 'true' : undefined}
                     onClick={() => setOpen(false)}
@@ -78,30 +88,30 @@ function GameSwitcher({ game }: { game: GameId | 'hub' }) {
                       <span className="hub-switcher__name">{g.title}</span>
                       <span className="hub-switcher__site">{g.name}</span>
                     </span>
-                    {current && <span className="hub-switcher__here">here</span>}
+                    {current && <span className="hub-switcher__here">{labels.here}</span>}
                   </a>
                 </li>
               );
             })}
           </ul>
-          {game !== 'hub' && <a href={HUB_URL} className="hub-switcher__all">All games</a>}
+          {game !== 'hub' && <a href={HUB_URL} className="hub-switcher__all">{labels.allGames}</a>}
         </div>
       )}
     </div>
   );
 }
 
-const defaultHomeLink = ({ className, children }: HomeLinkProps) => (
-  <a href="/" className={className}>{children}</a>
-);
-
-export function HubBar({ game, logo, nav, actions, renderHomeLink = defaultHomeLink }: HubBarProps) {
+export function HubBar({ game, logo, nav, actions, renderHomeLink, homeHref = '/', labels }: HubBarProps) {
   const g = game === 'hub' ? null : getGame(game);
+  const text = { ...DEFAULT_LABELS, ...labels };
+  const homeLink = renderHomeLink ?? (({ className, children }: HomeLinkProps) => (
+    <a href={homeHref} className={className}>{children}</a>
+  ));
   return (
     <header className="hub-bar" data-game={game}>
       <div className="hub-bar__inner">
         <div className="hub-bar__brand">
-          {renderHomeLink({
+          {homeLink({
             className: 'hub-bar__home',
             children: (
               <>
@@ -110,7 +120,7 @@ export function HubBar({ game, logo, nav, actions, renderHomeLink = defaultHomeL
               </>
             ),
           })}
-          <GameSwitcher game={game} />
+          <GameSwitcher game={game} homeHref={homeHref} labels={text} />
         </div>
         {nav && <nav className="hub-bar__nav" aria-label="Primary">{nav}</nav>}
         {actions && <div className="hub-bar__actions">{actions}</div>}
