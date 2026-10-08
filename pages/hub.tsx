@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { GAMES, GameMark, HubBar, HubFooter } from '../src';
+import { GAMES, GameIcon, HubBar, HubFooter } from '../src';
 import '../styles/hub.css';
 import '../styles/base.css';
 import '../styles/components.css';
@@ -18,8 +18,7 @@ function Hub() {
         <header className="landing__head">
           <h1>Altterisk Games</h1>
           <p className="hub-muted">
-            Community databases and viewers for {GAMES.length} games. Pick one to start; the switcher in
-            each site's top bar brings you back here or to another game.
+            Fan-made databases and tools for Millennium War Aigis, Last Origin and Make Drama.
           </p>
         </header>
         <div className="landing__grid">
@@ -27,10 +26,12 @@ function Hub() {
             <section key={g.id} className="hub-panel landing__card" data-game={g.id}>
               <a href={g.url} className="landing__main">
                 <div className="landing__title">
-                  <GameMark accent={g.accent} />
-                  <h2>{g.title}</h2>
+                  <GameIcon game={g} size={48} base="" />
+                  <div>
+                    <h2>{g.title}</h2>
+                    <div className="landing__site">{g.name}</div>
+                  </div>
                 </div>
-                <div className="landing__site">{g.name}</div>
                 <p className="hub-muted">{g.tagline}</p>
               </a>
               <div className="landing__sections" aria-label={`${g.title} sections`}>

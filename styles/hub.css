@@ -84,6 +84,14 @@
   transform: rotate(45deg);
 }
 
+.hub-icon {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 22%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--hub-border);
+}
+
 .hub-bar__nav {
   display: flex;
   gap: 2px;

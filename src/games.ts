@@ -12,6 +12,8 @@ export interface Game {
   tagline: string;
   url: string;
   accent: string;
+  /** Path of the game's app icon on the hub site (public/icons). */
+  icon: string;
   source: string;
   sections: GameSection[];
 }
@@ -32,6 +34,7 @@ export const GAMES: Game[] = [
     title: "Millennium War Aigis",
     tagline: 'Units, enemies, stages, collection checker and DPS tools',
     url: 'https://aigis.altterisk.cc',
+    icon: '/icons/aigis.png',
     accent: '#7aa2f7',
     source: 'https://github.com/Altterisk/Aigis-Enemy',
     sections: [
@@ -48,6 +51,7 @@ export const GAMES: Game[] = [
     title: 'Last Origin',
     tagline: 'Units, equipment, worlds, skins and team builder',
     url: 'https://lo.altterisk.cc',
+    icon: '/icons/lo.png',
     accent: '#f2727f',
     source: 'https://github.com/anyabot/LOMapR',
     sections: [
@@ -65,6 +69,7 @@ export const GAMES: Game[] = [
     title: 'Make Drama',
     tagline: 'Skin viewer, characters, stages and farm planner',
     url: 'https://mad.altterisk.cc',
+    icon: '/icons/mad.png',
     accent: '#f6c445',
     source: 'https://github.com/anyabot/MAD-Viewer',
     sections: [

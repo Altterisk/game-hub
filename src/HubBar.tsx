@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import { GAMES, HUB, HUB_URL, getGame, type GameId } from './games.js';
+import { GAMES, HUB, HUB_URL, getGame, type Game, type GameId } from './games.js';
 
 export interface HomeLinkProps {
   className: string;
@@ -16,6 +16,11 @@ export interface HubBarProps {
 
 export function GameMark({ accent }: { accent: string }) {
   return <span className="hub-mark" style={{ background: accent, boxShadow: `0 0 16px ${accent}66` }} />;
+}
+
+/** Icons live on the hub; the hub itself passes base="" to load them from its own origin. */
+export function GameIcon({ game, size = 24, base = HUB_URL }: { game: Game; size?: number; base?: string }) {
+  return <img className="hub-icon" src={base + game.icon} alt="" width={size} height={size} loading="lazy" />;
 }
 
 function GameSwitcher({ game }: { game: GameId | 'hub' }) {
@@ -68,7 +73,7 @@ function GameSwitcher({ game }: { game: GameId | 'hub' }) {
                     aria-current={current ? 'true' : undefined}
                     onClick={() => setOpen(false)}
                   >
-                    <GameMark accent={g.accent} />
+                    <GameIcon game={g} size={28} base={game === 'hub' ? '' : HUB_URL} />
                     <span className="hub-switcher__text">
                       <span className="hub-switcher__name">{g.title}</span>
                       <span className="hub-switcher__site">{g.name}</span>
@@ -91,7 +96,7 @@ const defaultHomeLink = ({ className, children }: HomeLinkProps) => (
 );
 
 export function HubBar({ game, logo, nav, actions, renderHomeLink = defaultHomeLink }: HubBarProps) {
-  const g = game === 'hub' ? HUB : getGame(game);
+  const g = game === 'hub' ? null : getGame(game);
   return (
     <header className="hub-bar" data-game={game}>
       <div className="hub-bar__inner">
@@ -100,8 +105,8 @@ export function HubBar({ game, logo, nav, actions, renderHomeLink = defaultHomeL
             className: 'hub-bar__home',
             children: (
               <>
-                {logo ?? <GameMark accent={g.accent} />}
-                <span className="hub-bar__name">{g.name}</span>
+                {logo ?? (g ? <GameIcon game={g} /> : <GameMark accent={HUB.accent} />)}
+                <span className="hub-bar__name">{(g ?? HUB).name}</span>
               </>
             ),
           })}

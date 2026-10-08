@@ -18,7 +18,7 @@ another.
 
 | Import | Use |
 |---|---|
-| `@altterisk/game-hub` | `HubBar`, `HubFooter`, `GameMark`, `GAMES`, `tokens`, `accentScale` |
+| `@altterisk/game-hub` | `HubBar`, `HubFooter`, `GameMark`, `GameIcon`, `GAMES`, `tokens`, `accentScale` |
 | `@altterisk/game-hub/chakra` | `hubChakraTheme(game)` → pass to Chakra v2 `extendTheme` |
 | `@altterisk/game-hub/hub.css` | Tokens as CSS variables, bar, switcher, footer. **Every site imports this.** |
 | `@altterisk/game-hub/base.css` | Global element defaults (plain-CSS sites only) |

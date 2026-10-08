@@ -16,10 +16,10 @@
 
 .landing__main { color: inherit; }
 .landing__main:hover { text-decoration: none; }
-.landing__title { display: flex; align-items: center; gap: 8px; }
+.landing__title { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .landing__title h2 { font-size: 20px; font-weight: 800; margin: 0; }
 .landing__main:hover h2 { color: var(--hub-accent); }
-.landing__site { color: var(--hub-accent); font-size: 13px; font-weight: 700; margin: 2px 0 10px 27px; }
+.landing__site { color: var(--hub-accent); font-size: 13px; font-weight: 700; margin-top: 2px; }
 .landing__main p { margin: 0 0 16px; }
 
 .landing__sections { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
