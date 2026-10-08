@@ -16,7 +16,7 @@ export interface Game {
   sections: GameSection[];
 }
 
-export const HUB_URL = 'https://altterisk.cc';
+export const HUB_URL = 'https://hub.altterisk.cc';
 
 export const HUB = {
   name: 'Altterisk Games',

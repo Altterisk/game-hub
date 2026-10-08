@@ -2,7 +2,7 @@
 
 Shared shell for the altterisk.cc game sites: top bar with game switcher, footer,
 design tokens, a Chakra theme and plain-CSS component classes, plus the hub landing
-page at `altterisk.cc`.
+page at `hub.altterisk.cc`.
 
 Each game site stays in its own repo with its own build, data and deploy. They only
 share this package, pinned to a tag, so updating one site never forces a rebuild of
@@ -96,5 +96,6 @@ npm run dev      # http://localhost:5173 (hub) and /demo.html (component preview
 npm run build    # library → dist/, hub site → dist-site/
 ```
 
-Deploy `dist-site/` to `altterisk.cc`. The demo page renders the real bar and sample
+Deployed by Cloudflare Pages on every push to `main` (build `npm run build`,
+output `dist-site`, custom domain `hub.altterisk.cc`). The demo page renders the real bar and sample
 components in each game's accent; it is the reference for the restyle.
