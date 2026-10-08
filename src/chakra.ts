@@ -36,22 +36,39 @@ export function hubChakraTheme(game: GameId) {
         body: { bg: c.bg, color: c.text, overflowX: 'hidden', textRendering: 'optimizeLegibility' },
         '::selection': { bg: 'accent.300', color: c.bg },
         '*': { scrollbarColor: `${gray[600]} transparent`, scrollbarWidth: 'thin' },
+        '::-webkit-scrollbar': { width: '8px', height: '8px' },
+        '::-webkit-scrollbar-thumb': { bg: 'gray.600', borderRadius: 'full' },
+        '::-webkit-scrollbar-track': { bg: 'transparent' },
         '*::placeholder': { color: c.textSubtle },
         '*, *::before, *::after': { borderColor: c.border },
+        'a, button, input, select, textarea': { WebkitTapHighlightColor: 'transparent' },
         'a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible': {
           outline: '2px solid',
           outlineColor: 'accent.300',
           outlineOffset: '2px',
         },
+        '@media (prefers-reduced-motion: reduce)': {
+          '*, *::before, *::after': {
+            scrollBehavior: 'auto !important',
+            transitionDuration: '0.01ms !important',
+            animationDuration: '0.01ms !important',
+            animationIterationCount: '1 !important',
+          },
+        },
       },
     },
     components: {
       Badge: {
-        baseStyle: { borderRadius: 'full', fontWeight: 700, px: 2, py: 0.5, textTransform: 'none' },
+        baseStyle: { borderRadius: 'full', fontWeight: 700, letterSpacing: '0.01em', px: 2, py: 0.5 },
         defaultProps: { colorScheme: 'accent' },
       },
       Button: {
-        baseStyle: { borderRadius: 'lg', fontWeight: 700 },
+        baseStyle: {
+          borderRadius: 'lg',
+          fontWeight: 700,
+          transitionProperty: 'background, border-color, color, box-shadow, transform',
+          transitionDuration: '160ms',
+        },
         defaultProps: { colorScheme: 'gray' },
       },
       Card: {
@@ -75,7 +92,8 @@ export function hubChakraTheme(game: GameId) {
           tab: {
             color: c.textMuted,
             fontWeight: 700,
-            _hover: { color: c.text },
+            borderRadius: 'md md 0 0',
+            _hover: { color: c.text, bg: 'whiteAlpha.50' },
             _selected: { color: 'accent.300' },
           },
         },
@@ -116,7 +134,7 @@ export function hubChakraTheme(game: GameId) {
         baseStyle: { content: { bg: c.surfaceRaised, borderColor: c.border, boxShadow: tokens.shadow.popover } },
       },
       Tooltip: {
-        baseStyle: { bg: gray[700], color: gray[50], borderRadius: 'md', px: 3, py: 2 },
+        baseStyle: { bg: gray[700], color: gray[50], borderRadius: 'md', boxShadow: 'lg', px: 3, py: 2 },
       },
     },
   };
