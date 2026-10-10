@@ -18,22 +18,100 @@ another.
 
 | Import | Use |
 |---|---|
-| `@altterisk/game-hub` | `HubBar`, `HubFooter`, `GameMark`, `GameIcon`, `GAMES`, `tokens`, `accentScale` |
+| `@altterisk/game-hub` | `HubBar`, `HubFooter`, `GameMark`, `GameIcon`, `GAMES`, `tokens`, `accentScale`, and the list components below |
 | `@altterisk/game-hub/chakra` | `hubChakraTheme(game)` → pass to Chakra v2 `extendTheme` |
 | `@altterisk/game-hub/hub.css` | Tokens as CSS variables, bar, switcher, footer. **Every site imports this.** |
 | `@altterisk/game-hub/base.css` | Global element defaults (plain-CSS sites only) |
-| `@altterisk/game-hub/components.css` | `.hub-panel`, `.hub-btn`, `.hub-input`, `.hub-table`, `.hub-tabs`, `.hub-badge`… (plain-CSS sites only) |
+| `@altterisk/game-hub/components.css` | `.hub-panel`, `.hub-btn`, `.hub-input`, `.hub-table`, `.hub-tabs`, `.hub-badge`, `.hub-chip`, `.hub-pager`… Only `hub-*` classes and no element resets, so Chakra sites can import it too (needed for the list components). |
+| `@altterisk/game-hub/codec` | Binary share/restore codes (see below) |
+| `@altterisk/game-hub/data` | JSON loader and URL helpers |
+| `@altterisk/game-hub/persist` | Versioned localStorage, plan-file export/import, one-time notices |
+| `@altterisk/game-hub/filters` | Tri-state filters, text search, URL-backed list state |
+| `@altterisk/game-hub/archive` | `.tar.br` asset archives (needs `brotli-dec-wasm` in the site) |
+| `@altterisk/game-hub/spine` | Pixi/Spine viewer primitives (the site passes its own `pixi.js` and `spine-pixi-v8`) |
 
 Put `data-game="<id>"` on `<html>` so the whole page picks up the game's accent.
 
 ## Install in a site
 
 ```sh
-npm install github:<owner>/game-hub#v0.1.0
+npm install github:Altterisk/game-hub#v0.2.0
 ```
 
 `prepare` builds `dist/` on install. Bump the tag in a site's `package.json` when
 that site wants the newer shell; other sites keep their pinned version.
+
+## Shared building blocks (v0.2.0)
+
+Lifted from code the three sites had each written or copied separately. Each site's
+own formats, URLs and storage keys stay site-side; these are the mechanics.
+
+### `/codec`
+
+- `ByteWriter` / `ByteReader`: `byte`, `raw`, `varint` (LEB128), `text` (length-prefixed UTF-8),
+  `id` (1-based index into an append-only id table, 0 + inline text otherwise), `idList`
+  (count + deltas of sorted unique ids), `compactIdList` (mode 0 delta list or mode 1 bitset,
+  whichever is shorter). `ByteReader(bytes, label)` errors read `"<label>: ended early"` etc.
+- `base64url.encode/decode` (decode also takes standard base64), `fnv1a32`, `withChecksum` /
+  `verifyChecksum` (4-byte little-endian FNV-1a trailer), `bitsetFromIds` / `idsFromBitset`.
+- `deflateRaw` / `inflateRaw` and `packJson` / `unpackJson` (JSON → deflate-raw → base64url).
+- Byte-for-byte compatible with Aigis `AIGC3.` codes, LOMapR `4.` team codes and Aigis DPS
+  `?z=` links (golden tests in `test/codec.test.ts`).
+
+### `/data`
+
+- `createJsonLoader({ urls: name => string[], retry = 1, retryOn })` → `{ load, peek, forget }`.
+  Concurrent loads share one request; successes are cached; failures are evicted so the next
+  call refetches. Candidate URLs are tried in order (region → global, local → CDN). Network
+  errors and 408/429/5xx get `retry` extra passes; pass `retryOn: () => true` to retry every
+  status.
+- `useJson(loader, name | null)` → `{ data, loading, error }`; fetches only in effects.
+- `bucketFor(id, bounds)` + `parseBounds(csv)` (inclusive upper bounds), `jsdelivrBase(...)`,
+  `trimSlash`.
+
+### `/persist`
+
+- `createPersisted({ key, version, empty, sanitize, migrate?, legacyKeys? })` →
+  `{ load, save, clear, toRecord, fromRecord }`. Stored as `{"__v": version, "data": ...}`;
+  anything without that envelope (data written before adoption) is version 0 and goes through
+  `migrate(raw, 0, sourceKey)`. Every read is sanitised; failures return `empty()`.
+- `fileText` / `exportFile` / `parseFile` / `readFile`: `{ format, version, ...fields }` JSON
+  files (MAD's plan-file shape), refusing other formats and newer versions.
+- `createSeenStore(key)` → `{ restore, isFresh, markSeen, reset, useShouldShow }` for
+  once-per-release notices; nothing shows before `restore()` runs after mount.
+
+### `/filters`
+
+- `FilterMode` (`0 | 1 | -1`), `nextFilterMode`, `filterValueAllowed` (LOMapR semantics).
+- `textMatch(query, fields)`: every token in some field, NFKC + case-insensitive.
+- `listState(adapter)` / `useListState(adapter)`: text, CSV lists and tri-state modes
+  (`"a,-b"`) in URL params; any filter change resets `page`. Adapters:
+  `searchParamsAdapter(...useSearchParams())` (react-router) and `nextRouterAdapter(useRouter())`
+  (Next pages router, shallow replace). `paginate`, `pageCount`.
+
+### Components (root export, styled by `components.css`)
+
+`SearchBox`, `FilterRow`, `FilterChip` (`active` or tri-state `mode`), `CheckboxGroup`,
+`Pager` (1-based, translatable `labels`), `CardGrid`, `FallbackImage` (`srcs` tried in order,
+then a placeholder), `CopyButton` / `ShareButton` (value may be async), `copyText`.
+
+### `/archive`
+
+`loadArchive(name, urlsFor, { decompress?, fetch? })` tries each URL, untars, caches per name
+and evicts failures. `untar` reads USTAR including PAX names and the prefix field. `urlFor`,
+`revokeArchiveUrls`, `readText`, `readBytes`, `cacheArchive` (for site-specific loaders such as
+loose files), `loadBrotli` (lazy `brotli-dec-wasm`; an optional peer dependency).
+
+### `/spine`
+
+Pass the site's `pixi.js` and `@esotericsoftware/spine-pixi-v8` modules in.
+`loadTexture`, `loadSpineAtlas({ PIXI, spine, name, files, atlasName, overrides })`,
+`readSkeletonJson` / `readSkeletonBinary` / `readSkeletonFile` (scale applied at parse),
+`createPixiApp({ PIXI, host, cancelled })` (autoDensity, host ResizeObserver, returns null if
+cancelled mid-init), `attachPanZoom(canvas, root, { claimDrag, zoomEnabled, panEnabled,
+onTransform })`, `zoomAt`, `mappedSourcePixelScale`, `attachmentScales`, `percentileScale`,
+`renderStageCanvas` / `tightCrop` / `downloadCanvas` / `saveStagePng` (`oversize: 'clamp' |
+'refuse'`), `canRecordCanvas` / `startCanvasVideo` (audio tracks passed in), `fixBlendAlpha`.
 
 ## Wiring
 
@@ -99,6 +177,7 @@ entry when it bumps its pin.
 npm install
 npm run dev      # http://localhost:5173 (hub) and /demo.html (component preview)
 npm run build    # library → dist/, hub site → dist-site/
+npm test         # vitest: codec golden tests, loaders, persistence, filters, archive, spine, components
 ```
 
 Deployed by Cloudflare Pages on every push to `main` (build `npm run build`,

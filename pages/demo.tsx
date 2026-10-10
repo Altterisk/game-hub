@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { GAMES, HubBar, HubFooter, type GameId } from '../src';
+import {
+  CardGrid, CheckboxGroup, FallbackImage, FilterChip, FilterRow, GAMES, HubBar, HubFooter, Pager, SearchBox, ShareButton,
+  type GameId,
+} from '../src';
+import { filterValueAllowed, listState, paginate, pageCount, textMatch, type ParamAdapter } from '../src/filters';
 import '../styles/hub.css';
 import '../styles/base.css';
 import '../styles/components.css';
@@ -19,6 +23,70 @@ const ROWS: [string, string, string, number, number][] = [
 ];
 
 const stop = (e: { preventDefault: () => void }) => e.preventDefault();
+
+const UNITS = Array.from({ length: 23 }, (_, i) => ({
+  id: i + 1,
+  name: ['Valkyrie', 'Gunner', 'Priest', 'Sentinel', 'Witch', 'Archer'][i % 6] + ' ' + (i + 1),
+  rarity: ['SSR', 'SR', 'R'][i % 3],
+  cls: ['Heavy', 'Ranged', 'Support'][i % 3 === 0 ? 0 : i % 2 ? 1 : 2],
+  icon: i % 4 === 0 ? null : `https://hub.altterisk.cc/icons/${['aigis', 'lo', 'mad'][i % 3]}.png`,
+}));
+
+function useMemoryParams(): ParamAdapter {
+  const [params, setParams] = useState<Record<string, string>>({});
+  return useMemo(() => ({
+    get: (k: string) => params[k] ?? null,
+    set: (updates: Record<string, string | null>) => setParams((cur) => {
+      const next = { ...cur };
+      for (const [k, v] of Object.entries(updates)) {
+        if (v === null) delete next[k];
+        else next[k] = v;
+      }
+      return next;
+    }),
+  }), [params]);
+}
+
+function ListDemo() {
+  const list = listState(useMemoryParams());
+  const rarity = list.list('rarity');
+  const cls = list.modes('cls');
+  const q = list.text('q');
+  const shown = UNITS.filter((u) => (!rarity.length || rarity.includes(u.rarity))
+    && filterValueAllowed(u.cls, cls) && textMatch(q, [u.name, u.id]));
+  const pages = pageCount(shown.length, 8);
+  return (
+    <section style={{ marginTop: 28 }}>
+      <h2>List building blocks</h2>
+      <p className="hub-muted">SearchBox, FilterRow with tri-state FilterChips, CheckboxGroup, CardGrid, FallbackImage and Pager, with filter state held by listState.</p>
+      <div className="hub-toolbar">
+        <SearchBox value={q} onChange={(v) => list.setText('q', v)} placeholder="Search name or id" />
+        <ShareButton />
+      </div>
+      <CheckboxGroup title="Rarity" options={['SSR', 'SR', 'R'].map((r) => ({ value: r, label: r }))}
+        selected={rarity} onToggle={(v) => list.toggle('rarity', v)} />
+      <FilterRow label="Class">
+        {['Heavy', 'Ranged', 'Support'].map((c) => (
+          <FilterChip key={c} mode={cls[c] ?? 0} onClick={() => list.cycleMode('cls', c)} title="Click: include, again: exclude">{c}</FilterChip>
+        ))}
+      </FilterRow>
+      <p className="hub-muted hub-small">{shown.length} of {UNITS.length} units</p>
+      <CardGrid min={150}>
+        {paginate(shown, list.page, 8).map((u) => (
+          <a key={u.id} href="#" className="hub-panel" onClick={stop} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: 10 }}>
+            <FallbackImage srcs={[u.icon]} width={40} height={40} alt="" style={{ borderRadius: 8 }} />
+            <span>
+              <strong style={{ display: 'block' }}>{u.name}</strong>
+              <span className={`hub-badge ${u.rarity === 'SSR' ? 'hub-badge--accent' : ''}`}>{u.rarity}</span>{' '}
+              <span className="hub-muted hub-small">{u.cls}</span>
+            </span>
+          </a>
+        ))}
+      </CardGrid>
+      <Pager page={Math.min(list.page, pages)} pages={pages} onPage={list.setPage} />
+    </section>
+  );
+}
 
 function Demo() {
   const [game, setGame] = useState<GameId>('aigis');
@@ -101,6 +169,7 @@ function Demo() {
             </tbody>
           </table>
         </div>
+        <ListDemo />
       </main>
       <HubFooter game={game} />
     </div>

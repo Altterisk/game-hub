@@ -1,38 +1,85 @@
 {
   "name": "@altterisk/game-hub",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Shared top bar, game switcher, footer and design tokens for the altterisk.cc game sites",
+  "description": "Shared shell, design tokens and cross-site building blocks for the altterisk.cc game sites",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./chakra": { "types": "./dist/chakra.d.ts", "default": "./dist/chakra.js" },
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./chakra": {
+      "types": "./dist/chakra.d.ts",
+      "default": "./dist/chakra.js"
+    },
+    "./codec": {
+      "types": "./dist/codec.d.ts",
+      "default": "./dist/codec.js"
+    },
+    "./data": {
+      "types": "./dist/data.d.ts",
+      "default": "./dist/data.js"
+    },
+    "./persist": {
+      "types": "./dist/persist.d.ts",
+      "default": "./dist/persist.js"
+    },
+    "./filters": {
+      "types": "./dist/filters.d.ts",
+      "default": "./dist/filters.js"
+    },
+    "./archive": {
+      "types": "./dist/archive.d.ts",
+      "default": "./dist/archive.js"
+    },
+    "./spine": {
+      "types": "./dist/spine.d.ts",
+      "default": "./dist/spine.js"
+    },
     "./hub.css": "./styles/hub.css",
     "./base.css": "./styles/base.css",
     "./components.css": "./styles/components.css"
   },
-  "files": ["dist", "styles"],
-  "sideEffects": ["*.css"],
+  "files": [
+    "dist",
+    "styles"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
   "scripts": {
     "build:lib": "tsc -p tsconfig.lib.json",
     "prepare": "npm run build:lib",
     "dev": "vite",
     "build": "npm run build:lib && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "peerDependencies": {
+    "brotli-dec-wasm": "^2.3.2",
     "react": ">=18"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^22.20.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
+    "brotli-dec-wasm": "^2.3.2",
+    "jsdom": "^25.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "typescript": "^5.7.3",
-    "vite": "^5.4.11"
+    "vite": "^5.4.11",
+    "vitest": "^2.1.9"
+  },
+  "peerDependenciesMeta": {
+    "brotli-dec-wasm": {
+      "optional": true
+    }
   }
 }
