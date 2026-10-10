@@ -48,6 +48,30 @@ describe('createPersisted', () => {
     expect(teams.load()).toEqual({ teams: ['4.BBBB'] });
   });
 
+  it('passes bare non-JSON strings through as version 0', () => {
+    const region = createPersisted<'global' | 'kr' | null>({
+      key: 'lomapr.region',
+      version: 1,
+      empty: () => null,
+      sanitize: (raw) => (raw === 'kr' || raw === 'global' ? raw : null),
+    });
+    localStorage.setItem('lomapr.region', 'kr');
+    expect(region.load()).toBe('kr');
+    region.save('global');
+    expect(region.load()).toBe('global');
+
+    const teams = createPersisted<{ teams: string[] }>({
+      key: 'lomapr.teams.v1',
+      version: 1,
+      legacyKeys: ['lomapr.team.v1'],
+      empty: () => ({ teams: [] }),
+      migrate: (raw, from, source) => (source === 'lomapr.team.v1' ? { teams: [String(raw)] } : raw),
+      sanitize: (raw) => ({ teams: Array.isArray((raw as { teams?: unknown })?.teams) ? (raw as { teams: string[] }).teams : [] }),
+    });
+    localStorage.setItem('lomapr.team.v1', '4.BAEAAQ');
+    expect(teams.load()).toEqual({ teams: ['4.BAEAAQ'] });
+  });
+
   it('fromRecord accepts exported records', () => {
     expect(store.fromRecord(store.toRecord({ collected: { z: true } }))).toEqual({ collected: { z: true } });
   });

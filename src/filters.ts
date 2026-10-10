@@ -115,21 +115,54 @@ export interface NextRouterLike {
     options?: { shallow?: boolean; scroll?: boolean }): unknown;
 }
 
+type Query = Record<string, string | string[]>;
+
+const definedQuery = (query: NextRouterLike['query']): Query => {
+  const out: Query = {};
+  for (const [k, v] of Object.entries(query)) if (v !== undefined) out[k] = v;
+  return out;
+};
+const dynamicKeys = (pathname: string) => Array.from(pathname.matchAll(/\[\[?(?:\.\.\.)?([^\]]+)\]\]?/g), (m) => m[1]);
+
+// useRouter() hands each render a snapshot, so the live search string is read and only dynamic segments come from the snapshot.
+function liveQuery(router: NextRouterLike): Query {
+  if (typeof window === 'undefined') return definedQuery(router.query);
+  const out: Query = {};
+  for (const k of dynamicKeys(router.pathname)) {
+    const v = router.query[k];
+    if (v !== undefined) out[k] = v;
+  }
+  const params = new URLSearchParams(window.location.search);
+  for (const k of new Set(params.keys())) {
+    const all = params.getAll(k);
+    out[k] = all.length > 1 ? all : all[0];
+  }
+  return out;
+}
+
+// router.replace lands asynchronously, so a second change before it does must build on the first.
+let pendingQuery: { pathname: string; query: Query } | null = null;
+
 // For Next's pages router: nextRouterAdapter(useRouter()). Shallow, no scroll jump.
 export function nextRouterAdapter(router: NextRouterLike): ParamAdapter {
+  const current = (): Query =>
+    (pendingQuery && pendingQuery.pathname === router.pathname ? pendingQuery.query : liveQuery(router));
   return {
     get(key) {
-      const v = router.query[key];
+      const v = current()[key];
       return Array.isArray(v) ? (v[0] ?? null) : (v ?? null);
     },
     set(updates) {
-      const query: Record<string, string | string[]> = {};
-      for (const [k, v] of Object.entries(router.query)) if (v !== undefined) query[k] = v;
+      const query = { ...current() };
       for (const [k, v] of Object.entries(updates)) {
         if (v === null || v === '') delete query[k];
         else query[k] = v;
       }
-      router.replace({ pathname: router.pathname, query }, undefined, { shallow: true, scroll: false });
+      const pending = { pathname: router.pathname, query };
+      pendingQuery = pending;
+      Promise.resolve(router.replace({ pathname: router.pathname, query }, undefined, { shallow: true, scroll: false }))
+        .catch(() => {})
+        .finally(() => { if (pendingQuery === pending) pendingQuery = null; });
     },
   };
 }

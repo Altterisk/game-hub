@@ -76,11 +76,14 @@ export function createPersisted<T>(options: PersistedOptions<T>): Persisted<T> {
         text = read(store, legacy);
       }
       if (text === null) return empty();
+      let raw: unknown;
       try {
-        return fromRecord(JSON.parse(text), source);
+        raw = JSON.parse(text);
       } catch {
-        return empty();
+        // Pre-adoption sites stored bare strings (a region, a share code); they reach migrate/sanitize as text.
+        raw = text;
       }
+      return fromRecord(raw, source);
     },
     save(value) {
       const store = storage();

@@ -93,4 +93,21 @@ describe('router adapters', () => {
     adapter.set({ q: 'sword', equip: null });
     expect(calls).toEqual([[{ pathname: '/equipment', query: { type: ['Chip', 'OS'], q: 'sword' } }, undefined, { shallow: true, scroll: false }]]);
   });
+
+  it('nextRouterAdapter builds on a change the router has not applied yet', async () => {
+    let apply = () => {};
+    const router: NextRouterLike = {
+      pathname: '/units',
+      query: {},
+      replace: (url) => new Promise<void>((done) => { apply = () => { router.query = url.query; done(); }; }),
+    };
+    const list = () => listState(nextRouterAdapter(router));
+    list().cycleMode('type', 'Heavy');
+    list().cycleMode('type', 'Heavy');
+    expect(list().modes('type')).toEqual({ Heavy: -1 });
+    apply();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(router.query).toEqual({ type: '-Heavy' });
+    expect(list().modes('type')).toEqual({ Heavy: -1 });
+  });
 });

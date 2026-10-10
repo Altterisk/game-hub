@@ -29,6 +29,7 @@ another.
 | `@altterisk/game-hub/filters` | Tri-state filters, text search, URL-backed list state |
 | `@altterisk/game-hub/archive` | `.tar.br` asset archives (needs `brotli-dec-wasm` in the site) |
 | `@altterisk/game-hub/spine` | Pixi/Spine viewer primitives (the site passes its own `pixi.js` and `spine-pixi-v8`) |
+| `@altterisk/game-hub/viewer` | Chakra v2 viewer chrome: labelled control panel pieces, layer panel, `ViewerShell` (needs `@chakra-ui/react` in the site) |
 
 Put `data-game="<id>"` on `<html>` so the whole page picks up the game's accent.
 
@@ -41,7 +42,7 @@ npm install github:Altterisk/game-hub#v0.2.0
 `prepare` builds `dist/` on install. Bump the tag in a site's `package.json` when
 that site wants the newer shell; other sites keep their pinned version.
 
-## Shared building blocks (v0.2.0)
+## Shared building blocks (v0.2.0, `/viewer` since v0.3.0)
 
 Lifted from code the three sites had each written or copied separately. Each site's
 own formats, URLs and storage keys stay site-side; these are the mechanics.
@@ -74,7 +75,8 @@ own formats, URLs and storage keys stay site-side; these are the mechanics.
 - `createPersisted({ key, version, empty, sanitize, migrate?, legacyKeys? })` →
   `{ load, save, clear, toRecord, fromRecord }`. Stored as `{"__v": version, "data": ...}`;
   anything without that envelope (data written before adoption) is version 0 and goes through
-  `migrate(raw, 0, sourceKey)`. Every read is sanitised; failures return `empty()`.
+  `migrate(raw, 0, sourceKey)`. Stored text that is not JSON (a bare `kr`, a raw share code)
+  arrives as that string. Every read is sanitised; failures return `empty()`.
 - `fileText` / `exportFile` / `parseFile` / `readFile`: `{ format, version, ...fields }` JSON
   files (MAD's plan-file shape), refusing other formats and newer versions.
 - `createSeenStore(key)` → `{ restore, isFresh, markSeen, reset, useShouldShow }` for
@@ -87,7 +89,9 @@ own formats, URLs and storage keys stay site-side; these are the mechanics.
 - `listState(adapter)` / `useListState(adapter)`: text, CSV lists and tri-state modes
   (`"a,-b"`) in URL params; any filter change resets `page`. Adapters:
   `searchParamsAdapter(...useSearchParams())` (react-router) and `nextRouterAdapter(useRouter())`
-  (Next pages router, shallow replace). `paginate`, `pageCount`.
+  (Next pages router, shallow replace). The Next adapter reads the live `location.search` (the
+  `useRouter()` snapshot lags a render) and builds a second change on one whose `replace` has
+  not landed yet. `paginate`, `pageCount`.
 
 ### Components (root export, styled by `components.css`)
 
@@ -112,6 +116,19 @@ cancelled mid-init), `attachPanZoom(canvas, root, { claimDrag, zoomEnabled, panE
 onTransform })`, `zoomAt`, `mappedSourcePixelScale`, `attachmentScales`, `percentileScale`,
 `renderStageCanvas` / `tightCrop` / `downloadCanvas` / `saveStagePng` (`oversize: 'clamp' |
 'refuse'`), `canRecordCanvas` / `startCanvasVideo` (audio tracks passed in), `fixBlendAlpha`.
+
+### `/viewer`
+
+Chakra v2 components for a viewer's control panel; `@chakra-ui/react` is an optional peer, so
+plain-CSS sites never load it. Colours use `accent.*`; all text comes in through props.
+
+- `ViewerShell({ stage, panel, height, theater, onTheaterChange, labels })`: stage beside a
+  scrolling panel on `lg`+, stacked on phones; theatre mode fills the window with the stage
+  (z-index 1400, Escape or the on-stage button leaves it).
+- `ControlSection` (renders nothing without rows), `ControlRow`, `SegmentedControl` (icon or
+  image per option), `ToggleRow` (spelled-out on/off, `labels`), `ActionButton`,
+  `OverlaySelect` (portalled, grouped options), `LayerPanel` (grouped slots, filter, group
+  hide/show, `labels`), `ViewerIcon` + `ViewerIconName`.
 
 ## Wiring
 

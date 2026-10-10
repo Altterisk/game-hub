@@ -1,6 +1,6 @@
 {
   "name": "@altterisk/game-hub",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "Shared shell, design tokens and cross-site building blocks for the altterisk.cc game sites",
@@ -39,6 +39,10 @@
       "types": "./dist/spine.d.ts",
       "default": "./dist/spine.js"
     },
+    "./viewer": {
+      "types": "./dist/viewer.d.ts",
+      "default": "./dist/viewer.js"
+    },
     "./hub.css": "./styles/hub.css",
     "./base.css": "./styles/base.css",
     "./components.css": "./styles/components.css"
@@ -61,15 +65,20 @@
   },
   "peerDependencies": {
     "brotli-dec-wasm": "^2.3.2",
-    "react": ">=18"
+    "react": ">=18",
+    "@chakra-ui/react": "^2.5.5"
   },
   "devDependencies": {
+    "@chakra-ui/react": "^2.5.5",
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^22.20.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
     "brotli-dec-wasm": "^2.3.2",
+    "framer-motion": "^10.11.2",
     "jsdom": "^25.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
@@ -79,6 +88,9 @@
   },
   "peerDependenciesMeta": {
     "brotli-dec-wasm": {
+      "optional": true
+    },
+    "@chakra-ui/react": {
       "optional": true
     }
   }
