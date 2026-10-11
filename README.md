@@ -246,5 +246,6 @@ npm test         # vitest: codec golden tests, loaders, persistence, filters, ar
 ```
 
 Deployed by Cloudflare Pages on every push to `main` (build `npm run build`,
-output `dist-site`, custom domain `hub.altterisk.cc`). The demo page renders the real bar and sample
+output `dist-site`, custom domain `hub.altterisk.cc`). Only the hub page is built and deployed;
+`demo.html` is local-only (`npm run dev`). The demo page renders the real bar and sample
 components in each game's accent; it is the reference for the restyle.

@@ -7,7 +7,8 @@ export default defineConfig({
   build: {
     outDir: 'dist-site',
     rollupOptions: {
-      input: { index: resolve(__dirname, 'index.html'), demo: resolve(__dirname, 'demo.html') },
+      // demo.html is dev-only: `npm run dev` serves it, the deployed hub never includes it.
+      input: { index: resolve(__dirname, 'index.html') },
     },
   },
 });
