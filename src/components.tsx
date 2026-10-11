@@ -59,24 +59,86 @@ export interface FilterChipProps {
   // Two-state chips pass `active`; tri-state chips pass `mode` (1 include, -1 exclude).
   active?: boolean;
   mode?: FilterMode;
+  // Shown after the label; an inactive chip with a count of 0 is dimmed.
+  count?: number;
   color?: string;
   title?: string;
   className?: string;
 }
 
-export function FilterChip({ onClick, children, active, mode, color, title, className }: FilterChipProps) {
+export function FilterChip({ onClick, children, active, mode, count, color, title, className }: FilterChipProps) {
   const state = mode ?? (active ? 1 : 0);
   return (
     <button
       type="button"
-      className={cx('hub-chip', state === 1 && 'hub-chip--on', state === -1 && 'hub-chip--exclude', className)}
+      className={cx(
+        'hub-chip',
+        state === 1 && 'hub-chip--on',
+        state === -1 && 'hub-chip--exclude',
+        count === 0 && state === 0 && 'hub-chip--empty',
+        className,
+      )}
       aria-pressed={state === 1 ? true : state === -1 ? 'mixed' : false}
       style={color ? ({ '--hub-chip-color': color } as CSSProperties) : undefined}
       title={title}
       onClick={onClick}
     >
       {children}
+      {count !== undefined && <span className="hub-chip__count">{count}</span>}
     </button>
+  );
+}
+
+export interface SegmentOption {
+  value: string;
+  label: ReactNode;
+}
+
+// Joined buttons. Pass several `selected` values for a multi-toggle group, one for a switch.
+export function SegmentedButtons({ options, selected, onToggle, label, className }: {
+  options: readonly SegmentOption[];
+  selected: readonly string[] | string;
+  onToggle: (value: string) => void;
+  label?: string;
+  className?: string;
+}) {
+  const on = typeof selected === 'string' ? [selected] : selected;
+  return (
+    <div className={cx('hub-seg', className)} role="group" aria-label={label}>
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          className="hub-seg__btn"
+          aria-pressed={on.includes(o.value)}
+          onClick={() => onToggle(o.value)}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// A titled result block: head (title, count badge, meta on the right), optional note line, body.
+export function GroupCard({ title, count, meta, note, children, className }: {
+  title: ReactNode;
+  count?: ReactNode;
+  meta?: ReactNode;
+  note?: ReactNode;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={cx('hub-group-card', className)}>
+      <header className="hub-group-card__head">
+        <h3 className="hub-group-card__title">{title}</h3>
+        {count !== undefined && <span className="hub-badge hub-badge--accent">{count}</span>}
+        {meta !== undefined && <span className="hub-group-card__meta">{meta}</span>}
+      </header>
+      {note && <p className="hub-group-card__note">{note}</p>}
+      <div className="hub-group-card__body">{children}</div>
+    </section>
   );
 }
 

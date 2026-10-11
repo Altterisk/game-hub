@@ -99,6 +99,22 @@ own formats, URLs and storage keys stay site-side; these are the mechanics.
 `Pager` (1-based, translatable `labels`), `CardGrid`, `FallbackImage` (`srcs` tried in order,
 then a placeholder), `CopyButton` / `ShareButton` (value may be async), `copyText`.
 
+Effect-index pieces (a page that lists who has an effect):
+
+- `FilterChip` `count` prop: a muted number after the label (`.hub-chip__count`). An inactive
+  chip with a count of 0 gets `.hub-chip--empty` (dimmed).
+- `SegmentedButtons({ options, selected, onToggle, label })`: joined buttons (`.hub-seg`,
+  `.hub-seg__btn`, `aria-pressed`). `selected` is an array for a multi-toggle group or one
+  string for a switch.
+- `.hub-toolbar--panel`: a `.hub-toolbar` boxed as a panel. Wrap the search box or a count in
+  `.hub-toolbar__end` to push it to the right edge.
+- `GroupCard({ title, count, meta, note })`: `.hub-group-card` with a head (title, accent count
+  badge, meta on the right), an optional note line (colour: `--hub-group-note-color`, default
+  the accent) and a body. Lay cards out with `.hub-group-grid` (two-up at desktop width, one-up
+  on phones) or `.hub-group-grid--wide` (always one-up).
+- `.hub-table--stack`: opt-in phone layout for any table. Under 600px each row becomes a card
+  and each `td` shows its column name from `data-label`. Works without `.hub-table`.
+
 ### `/archive`
 
 `loadArchive(name, urlsFor, { decompress?, fetch? })` tries each URL, untars, caches per name

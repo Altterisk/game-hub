@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
-  CardGrid, CheckboxGroup, FallbackImage, FilterChip, FilterRow, GAMES, HubBar, HubFooter, Pager, SearchBox, ShareButton,
+  CardGrid, CheckboxGroup, FallbackImage, FilterChip, FilterRow, GAMES, GroupCard, HubBar, HubFooter, Pager, SearchBox,
+  SegmentedButtons, ShareButton,
   type GameId,
 } from '../src';
 import { filterValueAllowed, listState, paginate, pageCount, textMatch, type ParamAdapter } from '../src/filters';
@@ -88,6 +89,59 @@ function ListDemo() {
   );
 }
 
+const EFFECT_ROWS: Record<string, [string, number][]> = {
+  Buff: [['ATK up', 15], ['Shield', 9], ['Defence up', 6], ['Toughness up', 0]],
+  Debuff: [['Attack down', 5], ['Defence down', 1]],
+  Control: [['Stun', 8], ['Knockback', 7], ['Fear', 0]],
+};
+
+function EffectIndexDemo() {
+  const [picked, setPicked] = useState('ATK up');
+  const [side, setSide] = useState<string[]>(['ally', 'enemy']);
+  const [sort, setSort] = useState('value');
+  const [q, setQ] = useState('');
+  const toggleSide = (v: string) => setSide((s) => (s.includes(v) ? s.filter((x) => x !== v) : [...s, v]));
+  return (
+    <section style={{ marginTop: 28 }}>
+      <h2>Effect index blocks</h2>
+      <p className="hub-muted">FilterRow + FilterChip with counts, a filter panel with SegmentedButtons, GroupCards in a group grid, and a table that stacks on phones.</p>
+      {Object.entries(EFFECT_ROWS).map(([label, chips]) => (
+        <FilterRow key={label} label={label}>
+          {chips.map(([name, n]) => (
+            <FilterChip key={name} count={n} active={picked === name} onClick={() => setPicked(name)}>{name}</FilterChip>
+          ))}
+        </FilterRow>
+      ))}
+      <div className="hub-toolbar hub-toolbar--panel" style={{ marginTop: 12 }}>
+        <SegmentedButtons label="Side" options={[{ value: 'ally', label: 'Allies' }, { value: 'enemy', label: 'Enemies' }]}
+          selected={side} onToggle={toggleSide} />
+        <SegmentedButtons label="Sort" options={[{ value: 'name', label: 'A-Z' }, { value: 'value', label: 'By value' }]}
+          selected={sort} onToggle={setSort} />
+        <div className="hub-toolbar__end"><SearchBox value={q} onChange={setQ} placeholder="Filter units" /></div>
+      </div>
+      <div className="hub-group-grid">
+        {['Deployment ATK', 'Sortie ATK'].map((title, gi) => (
+          <GroupCard key={title} title={title} count={gi ? 40 : 361} meta="ability" note={gi ? 'Highest value applies.' : 'Rows stack additively.'}>
+            <table className="hub-table hub-table--stack">
+              <thead><tr><th>#</th><th>Value</th><th>Unit</th><th>Target</th></tr></thead>
+              <tbody>
+                {ROWS.slice(0, 4).map(([name, , , atk], i) => (
+                  <tr key={name}>
+                    <td data-label="#" className="num">{i + 1}</td>
+                    <td data-label="Value" className="num">+{Math.round(atk / 50)}%</td>
+                    <td data-label="Unit">{name}</td>
+                    <td data-label="Target">all allies in range</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </GroupCard>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function Demo() {
   const [game, setGame] = useState<GameId>('aigis');
   const [tab, setTab] = useState(0);
@@ -170,6 +224,7 @@ function Demo() {
           </table>
         </div>
         <ListDemo />
+        <EffectIndexDemo />
       </main>
       <HubFooter game={game} />
     </div>

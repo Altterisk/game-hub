@@ -203,6 +203,110 @@ a.hub-panel:hover, .hub-panel--link:hover { text-decoration: none; border-color:
   text-decoration: line-through;
 }
 
+.hub-chip__count { color: var(--hub-text-subtle); font-weight: 500; font-variant-numeric: tabular-nums; }
+.hub-chip--on .hub-chip__count { color: var(--hub-text-muted); }
+.hub-chip--empty { opacity: 0.45; }
+
+.hub-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--hub-border-strong);
+  border-radius: var(--hub-radius-md);
+  overflow: hidden;
+}
+.hub-seg__btn {
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-left: 1px solid var(--hub-border-strong);
+  background: transparent;
+  color: var(--hub-text-muted);
+  font: 700 12px/1 var(--hub-font);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.hub-seg__btn:first-child { border-left: 0; }
+.hub-seg__btn:hover { background: rgba(255, 255, 255, 0.06); color: var(--hub-text); }
+.hub-seg__btn[aria-pressed="true"] { background: var(--hub-accent-soft); color: var(--hub-accent); }
+.hub-seg__btn:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: -2px; }
+
+/* A toolbar boxed as a panel; __end pushes its content (search, a count) to the right edge. */
+.hub-toolbar--panel {
+  padding: 10px 12px;
+  background: var(--hub-surface);
+  border: 1px solid var(--hub-border);
+  border-radius: var(--hub-radius-xl);
+}
+.hub-toolbar__end { margin-left: auto; }
+@media (max-width: 480px) {
+  .hub-toolbar__end { margin-left: 0; }
+}
+
+.hub-group-grid {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr));
+}
+.hub-group-grid--wide { grid-template-columns: 1fr; }
+.hub-group-card {
+  min-width: 0;
+  background: var(--hub-surface);
+  border: 1px solid var(--hub-border);
+  border-radius: var(--hub-radius-xl);
+  overflow: hidden;
+}
+.hub-group-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 12px 14px 6px;
+}
+.hub-group-card__title { margin: 0; padding: 0; border: 0; font: 700 15px/1.3 var(--hub-font); color: var(--hub-text); }
+.hub-group-card__meta { margin-left: auto; color: var(--hub-text-muted); font-size: 12px; }
+.hub-group-card__note { margin: 0; padding: 0 14px 6px; color: var(--hub-group-note-color, var(--hub-accent)); font-size: 12px; }
+.hub-group-card__body { padding: 4px 14px 12px; overflow-x: auto; }
+
+/* Opt-in phone layout for any table: each row becomes a card and each cell shows
+   its column name from data-label. `table.` lifts these over a
+   site's own base table rules. */
+@media (max-width: 600px) {
+  table.hub-table--stack, table.hub-table--stack tbody, table.hub-table--stack tr, table.hub-table--stack td { display: block; width: 100%; }
+  table.hub-table--stack thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  table.hub-table--stack tr { padding: 6px 0; border-bottom: 1px solid var(--hub-border); }
+  table.hub-table--stack tbody tr:last-child { border-bottom: 0; }
+  table.hub-table--stack td {
+    position: relative;
+    padding: 3px 0;
+    border: 0;
+    white-space: normal;
+    text-align: left;
+    max-width: none;
+    overflow-wrap: anywhere;
+  }
+  table.hub-table--stack td[data-label] { padding-left: 84px; min-height: 22px; }
+  table.hub-table--stack td[data-label]::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    top: 5px;
+    width: 72px;
+    color: var(--hub-text-subtle);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+}
+
 .hub-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; margin: 16px 0; }
 .hub-pager__status { color: var(--hub-text-muted); font-size: 12px; padding: 0 4px; }
 .hub-pager__jump { width: 56px; height: 28px; text-align: center; }

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CheckboxGroup, CopyButton, FallbackImage, FilterChip, Pager, SearchBox } from '../src/components';
+import { CheckboxGroup, CopyButton, FallbackImage, FilterChip, GroupCard, Pager, SearchBox, SegmentedButtons } from '../src/components';
 
 afterEach(cleanup);
 
@@ -20,6 +20,58 @@ describe('FilterChip', () => {
     expect(screen.getByText('Excluded').getAttribute('aria-pressed')).toBe('mixed');
     fireEvent.click(screen.getByText('Off'));
     expect(onClick).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('FilterChip count', () => {
+  it('shows the count and dims an inactive zero', () => {
+    render(
+      <div>
+        <FilterChip onClick={() => {}} count={12}>Heal</FilterChip>
+        <FilterChip onClick={() => {}} count={0}>Stun</FilterChip>
+        <FilterChip onClick={() => {}} count={0} active>Fear</FilterChip>
+      </div>,
+    );
+    const heal = screen.getByText('Heal').closest('button')!;
+    expect(heal.querySelector('.hub-chip__count')!.textContent).toBe('12');
+    expect(heal.className).not.toContain('hub-chip--empty');
+    expect(screen.getByText('Stun').closest('button')!.className).toContain('hub-chip--empty');
+    expect(screen.getByText('Fear').closest('button')!.className).not.toContain('hub-chip--empty');
+  });
+});
+
+describe('SegmentedButtons', () => {
+  const options = [{ value: 'buff', label: 'Buff' }, { value: 'debuff', label: 'Debuff' }];
+  it('marks every selected value as pressed', () => {
+    const onToggle = vi.fn();
+    render(<SegmentedButtons label="Kind" options={options} selected={['buff', 'debuff']} onToggle={onToggle} />);
+    expect(screen.getByText('Buff').getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByText('Debuff').getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(screen.getByText('Debuff'));
+    expect(onToggle).toHaveBeenCalledWith('debuff');
+    expect(screen.getByRole('group', { name: 'Kind' })).toBeTruthy();
+  });
+
+  it('takes a single value as a switch', () => {
+    render(<SegmentedButtons options={options} selected="debuff" onToggle={() => {}} />);
+    expect(screen.getByText('Buff').getAttribute('aria-pressed')).toBe('false');
+    expect(screen.getByText('Debuff').getAttribute('aria-pressed')).toBe('true');
+  });
+});
+
+describe('GroupCard', () => {
+  it('renders title, count, meta, note and body', () => {
+    render(<GroupCard title="Deployment ATK" count={361} meta="ability" note="Stacks additively."><p>rows</p></GroupCard>);
+    expect(screen.getByRole('heading', { name: 'Deployment ATK' })).toBeTruthy();
+    expect(screen.getByText('361').className).toContain('hub-badge');
+    expect(screen.getByText('ability').className).toBe('hub-group-card__meta');
+    expect(screen.getByText('Stacks additively.').className).toBe('hub-group-card__note');
+    expect(screen.getByText('rows').parentElement!.className).toBe('hub-group-card__body');
+  });
+
+  it('leaves out the note line when there is none', () => {
+    const { container } = render(<GroupCard title="x"><p>rows</p></GroupCard>);
+    expect(container.querySelector('.hub-group-card__note')).toBeNull();
   });
 });
 
