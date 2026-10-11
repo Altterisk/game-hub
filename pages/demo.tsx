@@ -5,6 +5,7 @@ import {
   SegmentedButtons, ShareButton,
   type GameId,
 } from '../src';
+import { PagesDemo } from './demoPages';
 import { filterValueAllowed, listState, paginate, pageCount, textMatch, type ParamAdapter } from '../src/filters';
 import '../styles/hub.css';
 import '../styles/base.css';
@@ -225,6 +226,7 @@ function Demo() {
         </div>
         <ListDemo />
         <EffectIndexDemo />
+        <PagesDemo />
       </main>
       <HubFooter game={game} />
     </div>

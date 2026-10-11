@@ -36,13 +36,13 @@ Put `data-game="<id>"` on `<html>` so the whole page picks up the game's accent.
 ## Install in a site
 
 ```sh
-npm install github:Altterisk/game-hub#v0.2.0
+npm install github:Altterisk/game-hub#v0.4.0
 ```
 
 `prepare` builds `dist/` on install. Bump the tag in a site's `package.json` when
 that site wants the newer shell; other sites keep their pinned version.
 
-## Shared building blocks (v0.2.0, `/viewer` since v0.3.0)
+## Shared building blocks (v0.2.0, `/viewer` since v0.3.0, page parts since v0.4.0)
 
 Lifted from code the three sites had each written or copied separately. Each site's
 own formats, URLs and storage keys stay site-side; these are the mechanics.
@@ -114,6 +114,38 @@ Effect-index pieces (a page that lists who has an effect):
   on phones) or `.hub-group-grid--wide` (always one-up).
 - `.hub-table--stack`: opt-in phone layout for any table. Under 600px each row becomes a card
   and each `td` shows its column name from `data-label`. Works without `.hub-table`.
+
+### Page parts (v0.4.0, root export, styled by `components.css`)
+
+Shared layout pieces for pages every site has (stage hub and detail, unit detail, entity
+lists, collections). Plain React, so plain-CSS and Chakra sites both use them; all text comes
+in through props or `labels`. Anything that renders a link takes `renderLink` (default
+`plainLink`, a plain `<a>`), e.g. `({ href, ...p }) => <Link to={href} {...p} />` or
+`({ href, ...p }) => <NextLink href={href} {...p} />`. Full comparison and adoption plan:
+`D:\Project\Web\PAGE_TEMPLATES_PLAN.md` (outside this repo).
+
+- Page skeleton: `Breadcrumbs({ items })` (last item is the current page),
+  `PageHeader({ art, title, subtitle, id, badges, meta, actions, level })`,
+  `MetaChips` / `MetaChip({ label, value, icon, href })`, `Panel({ title, note, actions, level })`,
+  `StatRows({ rows, columns })` / `StatRow` (a `<dl>`), `EmptyState`, `LoadState({ loading, error,
+  retry })`.
+- Tabs: `UrlTabs({ tabs, active, onChange, label, idBase })` (WAI-ARIA tabs, arrow/Home/End keys,
+  `hidden` tabs dropped, optional `count`) + `TabPanel`. `tabParam(adapter, tabs, key = 'tab')`
+  returns `[active, setActive]` backed by the URL through the `/filters` adapters; the first
+  visible tab is the default and keeps the URL clean, and switching tabs never resets `page`.
+- Lists: `ListToolbar({ search, count, actions, activeFilters, onClearFilters })`,
+  `FilterPanel({ open, onToggle, activeCount, phoneOnly })` (collapsible; with `phoneOnly`, always
+  open from 768px), `EntityTile({ href, icon, title, subtitle, badges })`. `/filters` adds
+  `useUrlText(list, ready, key)` for a search box that hydrates from the URL once and then leads.
+- Stage pages: `BannerCard({ href, art, title, badge, window, count, highlight })`,
+  `IconPreview({ label, count, max })` (capped icon row with "+N"),
+  `StageCard({ href, title, id, meta, previews })`, `RewardGrid({ items })` (`amount`, `chance`
+  0..1 shown via `formatChance`, optional `href`/`note`), `WaveNav({ count, index, onChange })`.
+- Detail and collection: `LevelControl({ value, min, max, step, onChange, label, marks })` (slider +
+  number box, clamps), `ProgressBar({ value, max, label })`, `Modal`, `Lightbox({ items, index,
+  onIndex, onClose })`, `BackupPanel({ code, onImportCode, onExportFile, onImportFile })` (import
+  handlers return an error message or nothing), `ReleaseList` / `ChangelogDialog` (pair with
+  `createSeenStore(...).useShouldShow('changelog:' + latest.date)`).
 
 ### `/archive`
 

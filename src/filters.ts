@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 // Three-state list filters: neutral -> include -> exclude -> neutral.
 export type FilterMode = 0 | 1 | -1;
@@ -165,4 +165,17 @@ export function nextRouterAdapter(router: NextRouterLike): ParamAdapter {
         .finally(() => { if (pendingQuery === pending) pendingQuery = null; });
     },
   };
+}
+
+// A text box bound to ?<key>=: read once the router is ready, then local state leads so typing never waits on the URL.
+export function useUrlText(list: ListState, ready: boolean, key = 'q'): [string, (value: string) => void] {
+  const [value, setValue] = useState('');
+  const hydrated = useRef(false);
+  const urlValue = list.text(key);
+  useEffect(() => {
+    if (!ready || hydrated.current) return;
+    hydrated.current = true;
+    setValue(urlValue);
+  }, [ready, urlValue]);
+  return [value, (next: string) => { setValue(next); list.setText(key, next); }];
 }
