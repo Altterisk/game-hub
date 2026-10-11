@@ -174,8 +174,9 @@ export function LevelControl({ value, min, max, step = 1, onChange, label, marks
   const clamp = (n: number) => Math.min(max, Math.max(min, Math.round(n / step) * step));
   const commit = () => {
     const n = Number(draft);
-    if (Number.isFinite(n) && draft.trim() !== '') onChange(clamp(n));
-    else setDraft(String(value));
+    const next = Number.isFinite(n) && draft.trim() !== '' ? clamp(n) : value;
+    setDraft(String(next));
+    if (next !== value) onChange(next);
   };
   return (
     <div className={cx('hub-level', className)}>

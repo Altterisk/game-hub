@@ -69,6 +69,16 @@ describe('detail parts', () => {
     expect(onChange).toHaveBeenLastCalledWith(45);
   });
 
+  it('LevelControl shows the clamped value when it equals the current one', () => {
+    const onChange = vi.fn();
+    render(<LevelControl label="Level" value={90} min={1} max={90} onChange={onChange} />);
+    const box = screen.getByRole('spinbutton') as HTMLInputElement;
+    fireEvent.change(box, { target: { value: '999' } });
+    fireEvent.keyDown(box, { key: 'Enter' });
+    expect(box.value).toBe('90');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it('ProgressBar exposes progress', () => {
     render(<ProgressBar label="Owned" value={30} max={120} />);
     const bar = screen.getByRole('progressbar');
