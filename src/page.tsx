@@ -180,6 +180,8 @@ export function UrlTabs({ tabs, active, onChange, label, idBase, className }: {
   const auto = useId();
   const base = idBase ?? auto;
   const shown = tabs.filter((t) => !t.hidden);
+  // If `active` matches no visible tab, the first one still takes keyboard focus.
+  const focusable = Math.max(0, shown.findIndex((t) => t.id === active));
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const move = (e: KeyboardEvent, i: number) => {
     const last = shown.length - 1;
@@ -204,7 +206,7 @@ export function UrlTabs({ tabs, active, onChange, label, idBase, className }: {
             id={`${base}-tab-${t.id}`}
             aria-selected={selected}
             aria-controls={`${base}-panel-${t.id}`}
-            tabIndex={selected ? 0 : -1}
+            tabIndex={i === focusable ? 0 : -1}
             className="hub-tab"
             onClick={() => onChange(t.id)}
             onKeyDown={(e) => move(e, i)}

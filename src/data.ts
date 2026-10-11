@@ -97,35 +97,29 @@ export interface JsonState<T> {
 
 // Pass null to stay idle. Fetches only in effects, so server rendering never starts a request.
 export function useJson<T = unknown>(loader: JsonLoader, name: string | null): JsonState<T> {
-  const cached = name === null ? undefined : loader.peek<T>(name);
-  const [state, setState] = useState<JsonState<T>>({
-    data: cached,
-    loading: name !== null && cached === undefined,
-    error: null,
-  });
+  const initial = (n: string | null): JsonState<T> & { name: string | null } => {
+    const hit = n === null ? undefined : loader.peek<T>(n);
+    return { name: n, data: hit, loading: n !== null && hit === undefined, error: null };
+  };
+  const [state, setState] = useState(() => initial(name));
 
   useEffect(() => {
-    if (name === null) {
-      setState({ data: undefined, loading: false, error: null });
-      return;
-    }
-    const hit = loader.peek<T>(name);
-    if (hit !== undefined) {
-      setState({ data: hit, loading: false, error: null });
-      return;
-    }
+    const start = initial(name);
+    setState(start);
+    if (name === null || !start.loading) return;
     let alive = true;
-    setState({ data: undefined, loading: true, error: null });
     loader.load<T>(name).then(
-      (data) => { if (alive) setState({ data, loading: false, error: null }); },
+      (data) => { if (alive) setState({ name, data, loading: false, error: null }); },
       (error) => {
-        if (alive) setState({ data: undefined, loading: false, error: error instanceof Error ? error : new Error(String(error)) });
+        if (alive) setState({ name, data: undefined, loading: false, error: error instanceof Error ? error : new Error(String(error)) });
       },
     );
     return () => { alive = false; };
   }, [loader, name]);
 
-  return state;
+  // Until the effect catches up, a changed name must not show the previous name's data.
+  const { data, loading, error } = state.name === name ? state : initial(name);
+  return { data, loading, error };
 }
 
 // Each bound is the highest id in its bucket (inclusive); ids above the last go to bounds.length.

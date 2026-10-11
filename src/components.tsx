@@ -17,13 +17,30 @@ export interface SearchBoxProps {
 export function SearchBox({ value, onChange, placeholder = 'Search', label, clearLabel = 'Clear search', debounceMs = 0, className }: SearchBoxProps) {
   const [draft, setDraft] = useState(value);
   const timer = useRef<ReturnType<typeof setTimeout>>();
-  useEffect(() => setDraft(value), [value]);
+  const current = useRef(value);
+  // Values this box sent that have not come back through `value` yet; anything else is an outside change.
+  const sent = useRef<string[]>([]);
+  current.current = value;
+  useEffect(() => {
+    const echo = sent.current.indexOf(value);
+    if (echo >= 0) {
+      sent.current = sent.current.slice(echo + 1);
+      return;
+    }
+    sent.current = [];
+    clearTimeout(timer.current);
+    setDraft(value);
+  }, [value]);
   useEffect(() => () => clearTimeout(timer.current), []);
+  const emit = (next: string) => {
+    if (next !== current.current) sent.current.push(next);
+    onChange(next);
+  };
   const update = (next: string) => {
     setDraft(next);
     clearTimeout(timer.current);
-    if (debounceMs > 0) timer.current = setTimeout(() => onChange(next), debounceMs);
-    else onChange(next);
+    if (debounceMs > 0) timer.current = setTimeout(() => emit(next), debounceMs);
+    else emit(next);
   };
   return (
     <div className={cx('hub-search', className)}>
@@ -200,6 +217,7 @@ export function Pager({ page, pages, onPage, labels, className }: {
   const [jump, setJump] = useState('');
   if (pages <= 1) return null;
   const t = { ...PAGER_LABELS, ...labels };
+  page = Math.min(Math.max(1, page), pages);
   const go = (p: number) => onPage(Math.min(pages, Math.max(1, p)));
   return (
     <nav className={cx('hub-pager', className)} aria-label={t.page(page, pages)}>
@@ -251,8 +269,9 @@ export interface FallbackImageProps extends Omit<ImgHTMLAttributes<HTMLImageElem
 export function FallbackImage({ srcs, missing, missingClassName, className, alt = '', loading = 'lazy', style, width, height, ...rest }: FallbackImageProps) {
   const list = srcs.filter((s): s is string => !!s);
   const key = list.join('\n');
-  const [index, setIndex] = useState(0);
-  useEffect(() => setIndex(0), [key]);
+  // Keyed by the list, so a new list starts at its first source on its very first render.
+  const [failed, setFailed] = useState({ key, index: 0 });
+  const index = failed.key === key ? failed.index : 0;
   if (index >= list.length) {
     return missing !== undefined
       ? <>{missing}</>
@@ -269,7 +288,7 @@ export function FallbackImage({ srcs, missing, missingClassName, className, alt 
       alt={alt}
       loading={loading}
       data-fallback={index > 0 ? index : undefined}
-      onError={() => setIndex((i) => i + 1)}
+      onError={() => setFailed((f) => ({ key, index: (f.key === key ? f.index : 0) + 1 }))}
     />
   );
 }

@@ -171,11 +171,27 @@ export function nextRouterAdapter(router: NextRouterLike): ParamAdapter {
 export function useUrlText(list: ListState, ready: boolean, key = 'q'): [string, (value: string) => void] {
   const [value, setValue] = useState('');
   const hydrated = useRef(false);
+  // Values written here that the URL has not caught up with; any other URL value is an outside change.
+  const sent = useRef<string[]>([]);
   const urlValue = list.text(key);
   useEffect(() => {
-    if (!ready || hydrated.current) return;
-    hydrated.current = true;
+    if (!ready) return;
+    if (!hydrated.current) {
+      hydrated.current = true;
+      setValue(urlValue);
+      return;
+    }
+    const echo = sent.current.indexOf(urlValue);
+    if (echo >= 0) {
+      sent.current = sent.current.slice(echo + 1);
+      return;
+    }
+    sent.current = [];
     setValue(urlValue);
   }, [ready, urlValue]);
-  return [value, (next: string) => { setValue(next); list.setText(key, next); }];
+  return [value, (next: string) => {
+    setValue(next);
+    if (next !== urlValue) sent.current.push(next);
+    list.setText(key, next);
+  }];
 }

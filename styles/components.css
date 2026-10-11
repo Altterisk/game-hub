@@ -535,6 +535,7 @@ a.hub-tile:hover { border-color: var(--hub-accent-line); background: var(--hub-s
 .hub-level__label { color: var(--hub-text-muted); font-size: 13px; white-space: nowrap; }
 .hub-level__range { width: 100%; min-width: 0; accent-color: var(--hub-accent); }
 .hub-level__number { width: 72px; height: 30px; text-align: center; }
+.hub-level--disabled .hub-level__range, .hub-level--disabled .hub-level__number { opacity: 0.45; cursor: not-allowed; }
 @media (max-width: 480px) {
   .hub-level { grid-template-columns: 1fr 72px; }
   .hub-level__label { grid-column: 1 / -1; }

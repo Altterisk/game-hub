@@ -148,6 +148,7 @@ export function WaveNav({ count, index, onChange, labels, className }: {
 }) {
   const t: WaveNavLabels = { prev: 'Previous wave', next: 'Next wave', wave: (i, n) => `Wave ${i + 1} / ${n}`, ...labels };
   if (count <= 1) return null;
+  index = Math.min(Math.max(0, index), count - 1);
   return (
     <div className={cx('hub-wave-nav', className)}>
       <button type="button" className="hub-btn hub-btn--sm" aria-label={t.prev} title={t.prev} disabled={index <= 0} onClick={() => onChange(index - 1)}>‹</button>
@@ -158,7 +159,7 @@ export function WaveNav({ count, index, onChange, labels, className }: {
 }
 
 // A slider with a number box; typing an out-of-range value clamps on blur or Enter.
-export function LevelControl({ value, min, max, step = 1, onChange, label, marks, className }: {
+export function LevelControl({ value, min, max, step = 1, onChange, label, marks, disabled, className }: {
   value: number;
   min: number;
   max: number;
@@ -166,12 +167,17 @@ export function LevelControl({ value, min, max, step = 1, onChange, label, marks
   onChange: (value: number) => void;
   label: ReactNode;
   marks?: readonly number[];
+  // Also on automatically when the range is empty (max <= min), e.g. a locked path.
+  disabled?: boolean;
   className?: string;
 }) {
+  const off = disabled || max <= min;
   const id = useId();
   const [draft, setDraft] = useState(String(value));
   useEffect(() => setDraft(String(value)), [value]);
-  const clamp = (n: number) => Math.min(max, Math.max(min, Math.round(n / step) * step));
+  const decimals = (String(step).split('.')[1] ?? '').length;
+  // Snaps to the grid that starts at min, and rounds away float noise from decimal steps.
+  const clamp = (n: number) => Number(Math.min(max, Math.max(min, min + Math.round((n - min) / step) * step)).toFixed(decimals));
   const commit = () => {
     const n = Number(draft);
     const next = Number.isFinite(n) && draft.trim() !== '' ? clamp(n) : value;
@@ -179,11 +185,12 @@ export function LevelControl({ value, min, max, step = 1, onChange, label, marks
     if (next !== value) onChange(next);
   };
   return (
-    <div className={cx('hub-level', className)}>
+    <div className={cx('hub-level', off && 'hub-level--disabled', className)}>
       <label className="hub-level__label" htmlFor={`${id}-range`}>{label}</label>
       <input
         id={`${id}-range`}
         className="hub-level__range"
+        disabled={off}
         type="range"
         min={min}
         max={max}
@@ -197,6 +204,7 @@ export function LevelControl({ value, min, max, step = 1, onChange, label, marks
       ) : null}
       <input
         className="hub-input hub-level__number"
+        disabled={off}
         type="number"
         inputMode="numeric"
         min={min}

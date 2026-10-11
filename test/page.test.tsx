@@ -153,8 +153,8 @@ describe('useUrlText', () => {
     act(() => result.current[1]('valk'));
     expect(result.current[0]).toBe('valk');
     expect(a.values.q).toBe('valk');
-    a.values.q = 'stale';
+    a.values.q = 'changed elsewhere';
     rerender({ ready: true });
-    expect(result.current[0]).toBe('valk');
+    expect(result.current[0]).toBe('changed elsewhere');
   });
 });
