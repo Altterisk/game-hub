@@ -217,6 +217,17 @@
     padding: 4px var(--hub-gutter) 8px;
   }
   .hub-bar__brand, .hub-bar__actions { min-height: 44px; }
+  /* The button sits after the site name, so a panel hung from it runs off the
+     right edge (and widens the page). Hang it from the bar's left edge instead,
+     just under the brand row (6px padding + 44px). */
+  .hub-bar__inner { position: relative; }
+  .hub-switcher { position: static; }
+  .hub-switcher__panel {
+    top: 54px;
+    left: var(--hub-gutter);
+    width: min(320px, calc(100% - 2 * var(--hub-gutter)));
+    max-width: none;
+  }
 }
 
 .hub-footer {
