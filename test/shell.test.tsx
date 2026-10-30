@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorBoundary, Gate, NavMenu, NotFound, SiteShell, routerLinks } from '../src/shell';
 import { createSetting, saveBlob } from '../src/persist';
-import { LiveBadge, formatRemaining, phaseOf, untilNext } from '../src/time';
+import { LiveBadge, formatRemaining, phaseOf, untilNext, useNow } from '../src/time';
 import { createPlayer } from '../src/audio';
 import { RichText, colorTag, ignoreTag, pickLang, replaceTag, resetTag, tokenize } from '../src/text';
 import { StoryLines, VoiceLineList } from '../src/story';
@@ -228,5 +228,23 @@ describe('StoryLines and VoiceLineList', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Play Join' }));
     fireEvent.click(screen.getByRole('button', { name: 'Stop' }));
     expect(screen.getByRole('button', { name: 'Play Join' })).toBeTruthy();
+  });
+});
+
+describe('useNow', () => {
+  it('subscribes once and does not re-render without a tick', async () => {
+    let tick = 1_700_000_000_000;
+    const spy = vi.spyOn(Date, 'now').mockImplementation(() => (tick += 1));
+    let renders = 0;
+    function Clock() {
+      renders += 1;
+      const now = useNow(60_000);
+      return <span>{now === null ? 'none' : 'set'}</span>;
+    }
+    render(<Clock />);
+    await act(async () => { await new Promise((r) => setTimeout(r, 50)); });
+    expect(screen.getByText('set')).toBeTruthy();
+    spy.mockRestore();
+    expect(renders).toBeLessThanOrEqual(3);
   });
 });

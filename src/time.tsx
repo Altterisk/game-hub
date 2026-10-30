@@ -51,16 +51,48 @@ export function formatRemaining(duration: number, units: DurationUnits = { d: 'd
   return `${m}${units.m}`;
 }
 
-const clocks = new Map<number, { now: number; listeners: Set<() => void>; timer?: ReturnType<typeof setInterval> }>();
+interface Clock {
+  now: number;
+  listeners: Set<() => void>;
+  timer?: ReturnType<typeof setInterval>;
+  subscribe: (listener: () => void) => () => void;
+  read: () => number;
+}
 
-function clock(interval: number) {
+const clocks = new Map<number, Clock>();
+
+// One clock per interval with stable subscribe/read, so React never resubscribes on a re-render.
+function clock(interval: number): Clock {
   let c = clocks.get(interval);
-  if (!c) {
-    c = { now: Date.now(), listeners: new Set() };
-    clocks.set(interval, c);
-  }
+  if (c) return c;
+  const created: Clock = {
+    now: Date.now(),
+    listeners: new Set(),
+    subscribe(listener) {
+      created.listeners.add(listener);
+      if (!created.timer) {
+        created.now = Date.now();
+        created.timer = setInterval(() => {
+          created.now = Date.now();
+          created.listeners.forEach((fn) => fn());
+        }, interval);
+      }
+      return () => {
+        created.listeners.delete(listener);
+        if (!created.listeners.size && created.timer) {
+          clearInterval(created.timer);
+          created.timer = undefined;
+        }
+      };
+    },
+    read: () => created.now,
+  };
+  clocks.set(interval, created);
+  c = created;
   return c;
 }
+
+const serverNow = () => null;
 
 /**
  * The current time, ticking every `interval` ms. `null` on the server and during hydration, so
@@ -68,27 +100,7 @@ function clock(interval: number) {
  */
 export function useNow(interval = 60_000): number | null {
   const c = clock(interval);
-  return useSyncExternalStore(
-    (l) => {
-      c.listeners.add(l);
-      if (!c.timer) {
-        c.now = Date.now();
-        c.timer = setInterval(() => {
-          c.now = Date.now();
-          c.listeners.forEach((fn) => fn());
-        }, interval);
-      }
-      return () => {
-        c.listeners.delete(l);
-        if (!c.listeners.size && c.timer) {
-          clearInterval(c.timer);
-          c.timer = undefined;
-        }
-      };
-    },
-    () => c.now,
-    () => null,
-  );
+  return useSyncExternalStore(c.subscribe, c.read, serverNow);
 }
 
 export type PhaseLabels = Record<Phase, ReactNode>;
