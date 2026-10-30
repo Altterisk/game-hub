@@ -15,6 +15,8 @@ export interface Game {
   /** Path of the game's app icon on the hub site (public/icons). */
   icon: string;
   source: string;
+  /** Rights holder of the game's art and data, named in the footer's legal line. */
+  rights?: string;
   sections: GameSection[];
 }
 
@@ -54,6 +56,7 @@ export const GAMES: Game[] = [
     icon: '/icons/lo.png',
     accent: '#f2727f',
     source: 'https://github.com/anyabot/LOMapR',
+    rights: 'Valofe',
     sections: [
       { label: 'Units', path: '/units' },
       { label: 'Equipment', path: '/equipment' },

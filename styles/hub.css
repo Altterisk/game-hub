@@ -254,6 +254,72 @@
 .hub-footer a:hover { color: var(--hub-accent); text-decoration: none; }
 .hub-footer__games a { color: var(--hub-text-subtle); }
 .hub-footer__note { color: var(--hub-text-subtle); font-size: 12px; }
+.hub-footer__legal { color: var(--hub-text-subtle); font-size: 11px; max-width: 72ch; line-height: 1.5; }
+.hub-footer__legal a { color: var(--hub-text-subtle); text-decoration: underline; }
+
+.hub-shell { min-height: 100vh; display: flex; flex-direction: column; }
+.hub-shell__main { flex: 1; outline: none; }
+.hub-shell__content {
+  max-width: var(--hub-max-width);
+  margin: 0 auto;
+  padding: 16px var(--hub-gutter) 40px;
+}
+.hub-skip {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 1100;
+  padding: 8px 14px;
+  border-radius: var(--hub-radius-sm);
+  background: var(--hub-accent);
+  color: var(--hub-bg);
+  font: 600 14px var(--hub-font);
+  text-decoration: none;
+}
+.hub-skip:focus { top: 8px; }
+
+.hub-navmenu__button { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; background: transparent; border: 0; cursor: pointer; font-family: inherit; }
+.hub-navmenu__panel {
+  z-index: 1050;
+  min-width: 190px;
+  padding: 4px;
+  border: 1px solid var(--hub-border);
+  border-radius: var(--hub-radius-md);
+  background: var(--hub-surface-raised);
+  box-shadow: var(--hub-shadow-popover);
+  font-family: var(--hub-font);
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.hub-navmenu__link {
+  display: block;
+  padding: 8px 12px;
+  border-radius: var(--hub-radius-sm);
+  color: var(--hub-text);
+  text-decoration: none;
+}
+.hub-navmenu__link:hover, .hub-navmenu__link:focus-visible { background: var(--hub-surface-hover); text-decoration: none; outline: none; }
+.hub-navmenu__link.is-active { color: var(--hub-accent); font-weight: 700; }
+
+.hub-scroll-top {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1000;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: var(--hub-accent);
+  color: var(--hub-bg);
+  opacity: 0.75;
+  box-shadow: var(--hub-shadow-popover);
+  cursor: pointer;
+}
+.hub-scroll-top:hover { opacity: 1; }
+@media (min-width: 768px) { .hub-scroll-top { right: 24px; bottom: 24px; } }
 
 @media (prefers-reduced-motion: reduce) {
   .hub-bar *, .hub-footer * { transition: none !important; }

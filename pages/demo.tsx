@@ -15,6 +15,7 @@ const NAV: Record<GameId, string[]> = {
   aigis: ['Units', 'Collection', 'Enemies', 'Stages', 'Buffs', 'Cost Gen', 'DPS', 'Weather'],
   lo: ['Units', 'Equipment', 'Enemies', 'World', 'Sanctum', 'Infinite War', 'Skins', 'NPCs', 'Team', 'Gacha', 'Misc'],
   mad: ['Viewer', 'Characters', 'Effects', 'Stages', 'Farm', 'Changelog'],
+  taimanin: ['Units', 'Events', 'Banners', 'Story', 'Quests', 'Buffs'],
 };
 
 const ROWS: [string, string, string, number, number][] = [

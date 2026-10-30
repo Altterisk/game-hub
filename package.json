@@ -1,6 +1,7 @@
 {
   "name": "@altterisk/game-hub",
-  "version": "0.4.4",
+  "version": "0.5.0",
+  "license": "AGPL-3.0-or-later",
   "private": true,
   "type": "module",
   "description": "Shared shell, design tokens and cross-site building blocks for the altterisk.cc game sites",
@@ -43,6 +44,34 @@
       "types": "./dist/viewer.d.ts",
       "default": "./dist/viewer.js"
     },
+    "./meta": {
+      "types": "./dist/meta.d.ts",
+      "default": "./dist/meta.js"
+    },
+    "./meta/dom": {
+      "types": "./dist/metaDom.d.ts",
+      "default": "./dist/metaDom.js"
+    },
+    "./meta/next": {
+      "types": "./dist/metaNext.d.ts",
+      "default": "./dist/metaNext.js"
+    },
+    "./build": {
+      "types": "./dist/build.d.ts",
+      "default": "./dist/build.js"
+    },
+    "./time": {
+      "types": "./dist/time.d.ts",
+      "default": "./dist/time.js"
+    },
+    "./audio": {
+      "types": "./dist/audio.d.ts",
+      "default": "./dist/audio.js"
+    },
+    "./text": {
+      "types": "./dist/text.d.ts",
+      "default": "./dist/text.js"
+    },
     "./hub.css": "./styles/hub.css",
     "./base.css": "./styles/base.css",
     "./components.css": "./styles/components.css"
@@ -66,6 +95,7 @@
   "peerDependencies": {
     "brotli-dec-wasm": "^2.3.2",
     "react": ">=18",
+    "react-dom": ">=18",
     "@chakra-ui/react": "^2.5.5"
   },
   "devDependencies": {

@@ -29,6 +29,7 @@ another.
 | `@altterisk/game-hub/persist` | Versioned localStorage, plan-file export/import, one-time notices |
 | `@altterisk/game-hub/filters` | Tri-state filters, text search, URL-backed list state |
 | `@altterisk/game-hub/archive` | `.tar.br` asset archives (needs `brotli-dec-wasm` in the site) |
+| `@altterisk/game-hub/meta`, `/meta/dom`, `/meta/next`, `/build`, `/time`, `/audio`, `/text` | SEO head tags and build files, event phases, one-at-a-time audio, game-text markup (see "Framework modules") |
 | `@altterisk/game-hub/spine` | Pixi/Spine viewer primitives (the site passes its own `pixi.js` and `spine-pixi-v8`) |
 | `@altterisk/game-hub/viewer` | Chakra v2 viewer chrome: labelled control panel pieces, layer panel, `ViewerShell` (needs `@chakra-ui/react` in the site) |
 
@@ -179,6 +180,77 @@ plain-CSS sites never load it. Colours use `accent.*`; all text comes in through
   `OverlaySelect` (portalled, grouped options), `LayerPanel` (grouped slots, filter, group
   hide/show, `labels`), `ViewerIcon` + `ViewerIconName`.
 
+## Framework modules (v0.5.0)
+
+### Legal notice
+
+`HubFooter` prints a legal line on every site, after `note`: the game's rights holder from
+`Game.rights` ("… are the property of Valofe. All rights belong to Valofe."), or generic
+wording when a game has none, then "Site code: AGPL-3.0" linking to the repo's `LICENSE`.
+`legal` replaces it (`false` hides it); `labels.rights(owner, title)`, `labels.unowned` and
+`labels.license` translate it. `rightsText(game)` and `licenseUrl(source)` give the same text
+for about pages and READMEs.
+
+### `/meta`, `/meta/dom`, `/meta/next`
+
+Page titles, descriptions, canonicals, Open Graph and JSON-LD from one definition, with no
+Next or router dependency.
+
+- `createSiteMeta({ game, url, homeTitle, format, defaultDescription, defaultImage })` returns
+  `fullTitle`, `sitePath` (each segment encoded once), `canonicalUrl(path, query, keep)` (only
+  the `keep` params, in that order), `absUrl`, `headTags(page, url)` (`url: null` omits
+  canonical and `og:url`), `websiteLd`, `breadcrumbLd`. Default title format:
+  `<title> — <game title> | <site name>`.
+- Helpers: `clip`, `sentence`, `plainText(text, strip?)`, `escapeHtml`, `jsonLdText`,
+  `headHtml(tags)` (static HTML).
+- `/meta/dom`: `applyHead(tags)` / `useHead(tags)` write `document.head` (Vite sites). Tags a
+  page no longer wants (canonical, robots, `og:url`, `og:image`) are removed, including ones
+  baked into prerendered HTML.
+- `/meta/next`: `createSeo({ site, Head, useRouter, identityParams, basePath })` → `{ Seo }`.
+  Pass `next/head` and `next/router`'s `useRouter`. On query-routed pages listed in
+  `identityParams` the canonical waits for `isReady`, so prerendered HTML never names the bare
+  route for every entity.
+
+### `/build` (Node)
+
+`sitemapXml(urls)`, `robotsTxt(origin, { disallow })`, `writeSitemap`, `writeRobots`,
+`htmlRoutes(dir, { exclude })` (`units/index.html` and `units.html` → `/units/`),
+`countFiles`, `renderStatic(template, tags, body)` (swaps the template's head tags, fills the
+empty `#root`), and `prerenderPlugin({ pages, url, origin, robots, fileBudget, localOnly })`,
+a Vite plugin writing a static HTML file per page plus sitemap and robots after `vite build`.
+From a CommonJS script, load it with `await import('@altterisk/game-hub/build')`.
+
+### App shell (root export, styled by `hub.css`)
+
+- `SiteShell({ game, nav, actions, renderHomeLink, footer, belowBar, resetKey, contentWidth, scrollTop, contained })`:
+  skip link, `HubBar`, `<main id="hub-main">` inside an `ErrorBoundary`, `HubFooter`.
+- `ErrorBoundary({ resetKey, fallback, onError, labels })`: a retry panel instead of a blank
+  page; a new `resetKey` (the route path) clears it.
+- `NotFound({ title, hint, homeHref, renderLink })`. Set `noindex` through `/meta`.
+- `NavMenu({ label, items, renderLink, showActiveLabel })`: the bar's "Etc" dropdown, portalled
+  (the nav row scrolls and would clip it), kept on screen, arrow keys/Home/End/Escape.
+- `Gate({ storageKey, title, acceptLabel, leaveLabel, param, page })`: once-per-browser age or
+  content warning over the page; works without stylesheets and through a plain `?enter=1` link.
+- `ScrollTop`, `routerLinks(Link, 'href' | 'to')` → `RenderLink`, `homeLink(Link)` →
+  `renderHomeLink`, `useDismiss`, `useAnchoredPosition`.
+
+### Utilities
+
+- `/persist` adds `createSetting({ key, initial, sanitize, legacyKeys })` → `get`, `set`,
+  `reset`, `use()`: one saved preference shared by every reader (`useSyncExternalStore`;
+  `initial` on the server). Bare strings stored before adoption reach `sanitize` as text.
+  Also `saveBlob(blob, fileName)`.
+- `/time`: `phaseOf({ start, end, stagesEnd }, now)` → `upcoming | running | exchange | ended`
+  (a date-only end counts the whole day), `untilNext`, `formatRemaining(ms, units)`,
+  `useNow(interval)` (`null` until hydrated), `<LiveBadge window labels countdown>`.
+- `/audio`: `createPlayer({ cacheSize })` → `play(id, source)`, `toggle`, `stop`,
+  `useNowPlaying()`. One clip at a time; a later `play` cancels a slower earlier load.
+- `/text`: `tokenize(text, rules)` and `<RichText text rules>` with `colorTag`, `resetTag`,
+  `ignoreTag`, `replaceTag` (rules are joined into one regex: no backreferences), and
+  `pickLang(value, lang, ...fallbacks)`.
+- Root: `StoryLines({ lines })` (place, narration, choice, options with branches, speaker rows;
+  the site maps its data to `StoryLineView` and renders text) and
+  `VoiceLineList({ items, playing, onPlay, onStop })`.
 ## Wiring
 
 ### Aigis (Vite + React Router)
@@ -233,7 +305,7 @@ about the package's ESM.
 
 ## Adding a game
 
-Add an entry to `GAMES` in `src/games.ts`, its accent to `styles/hub.css`
+Add an entry to `GAMES` in `src/games.ts` (with `rights` when the rights holder is known), its accent to `styles/hub.css`
 (`[data-game="…"]`) and `GameId`, tag a release. Each site picks up the new switcher
 entry when it bumps its pin.
 
@@ -250,3 +322,13 @@ Deployed by Cloudflare Pages on every push to `main` (build `npm run build`,
 output `dist-site`, custom domain `hub.altterisk.cc`). Only the hub page is built and deployed;
 `demo.html` is local-only (`npm run dev`). The demo page renders the real bar and sample
 components in each game's accent; it is the reference for the restyle.
+
+## License
+
+The code is licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0-or-later):
+copy, change and reuse it, as long as anything built from it, including a site that only runs
+a modified copy, is released as open source under the same license.
+
+The license covers the code only. Game names, art, audio, text and data shown by the sites
+belong to their rights holders and are not covered. `HubFooter` prints this notice on every
+site (`Game.rights` names the holder; games without one get generic wording).

@@ -10,24 +10,59 @@ export interface HubFooterLabels {
   source: string;
   portfolio: string;
   allGames: string;
+  /** Legal line when the game has a named rights holder. */
+  rights: (owner: string, title: string) => string;
+  /** Legal line when it has none (and on the hub). */
+  unowned: string;
+  license: string;
 }
 
-const DEFAULT_LABELS: HubFooterLabels = { source: 'Source', portfolio: 'Portfolio', allGames: 'All games' };
+export const LICENSE_NAME = 'AGPL-3.0';
+
+const DEFAULT_LABELS: HubFooterLabels = {
+  source: 'Source',
+  portfolio: 'Portfolio',
+  allGames: 'All games',
+  rights: (owner, title) =>
+    `Fan-made and unofficial. ${title} images, data and other game assets are the property of ${owner}. All rights belong to ${owner}.`,
+  unowned: 'Fan-made and unofficial. Game art, audio and text belong to their respective owners.',
+  license: `Site code: ${LICENSE_NAME}`,
+};
 
 export interface HubFooterProps {
   game: GameId | 'hub';
   links?: FooterLink[];
   note?: ReactNode;
+  /** Replaces the automatic rights + license line; `false` hides it. */
+  legal?: ReactNode | false;
   labels?: Partial<HubFooterLabels>;
 }
 
-export function HubFooter({ game, links, note, labels }: HubFooterProps) {
+/** The rights sentence for a game, for reuse outside the footer (about pages, READMEs). */
+export function rightsText(game: GameId | 'hub', labels?: Partial<HubFooterLabels>): string {
+  const text = { ...DEFAULT_LABELS, ...labels };
+  if (game === 'hub') return text.unowned;
+  const g = getGame(game);
+  return g.rights ? text.rights(g.rights, g.title) : text.unowned;
+}
+
+export function licenseUrl(source: string): string {
+  return `${source}/blob/HEAD/LICENSE`;
+}
+
+export function HubFooter({ game, links, note, legal, labels }: HubFooterProps) {
   const g = game === 'hub' ? HUB : getGame(game);
   const text = { ...DEFAULT_LABELS, ...labels };
   const own = links ?? [
     { label: text.source, href: g.source },
     { label: text.portfolio, href: 'https://altterisk.github.io/portfolio/' },
   ];
+  const legalLine = legal ?? (
+    <>
+      {rightsText(game, labels)}{' '}
+      <a href={licenseUrl(g.source)} target="_blank" rel="noreferrer">{text.license}</a>
+    </>
+  );
   return (
     <footer className="hub-footer" data-game={game}>
       <div className="hub-footer__inner">
@@ -44,6 +79,7 @@ export function HubFooter({ game, links, note, labels }: HubFooterProps) {
           ))}
         </div>
         {note && <div className="hub-footer__note">{note}</div>}
+        {legalLine !== false && <div className="hub-footer__legal">{legalLine}</div>}
       </div>
     </footer>
   );

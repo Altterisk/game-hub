@@ -121,7 +121,11 @@ export function fileText(format: string, version: number, data: Record<string, u
 }
 
 export function downloadText(text: string, fileName: string, type = 'application/json'): void {
-  const url = URL.createObjectURL(new Blob([text], { type }));
+  saveBlob(new Blob([text], { type }), fileName);
+}
+
+export function saveBlob(blob: Blob, fileName: string): void {
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = fileName;
@@ -227,6 +231,70 @@ export function createSeenStore(storageKey: string, storage: () => Storage | nul
     useShouldShow(key) {
       const get = useCallback(() => state.ready && !state.seen[key], [key]);
       return useSyncExternalStore(subscribe, get, () => false);
+    },
+  };
+}
+
+export interface SettingOptions<T> {
+  key: string;
+  initial: T;
+  /** Rebuilds a trusted value; a bare string written before adoption arrives here as text. */
+  sanitize?: (raw: unknown) => T;
+  version?: number;
+  migrate?: PersistedOptions<T>['migrate'];
+  legacyKeys?: readonly string[];
+  storage?: () => Storage | null;
+}
+
+export interface Setting<T> {
+  get(): T;
+  set(value: T | ((prev: T) => T)): void;
+  reset(): void;
+  subscribe(listener: () => void): () => void;
+  /** The value and a setter; renders `initial` on the server and during hydration. */
+  use(): [T, (value: T | ((prev: T) => T)) => void];
+}
+
+/** A saved user preference shared by every component that reads it. */
+export function createSetting<T>(options: SettingOptions<T>): Setting<T> {
+  const { initial, sanitize = (raw: unknown) => (raw === undefined || raw === null ? initial : (raw as T)) } = options;
+  const store = createPersisted<T>({
+    key: options.key,
+    version: options.version ?? 1,
+    empty: () => initial,
+    sanitize,
+    migrate: options.migrate,
+    legacyKeys: options.legacyKeys,
+    storage: options.storage,
+  });
+  let value: T | undefined;
+  const listeners = new Set<() => void>();
+  const get = () => {
+    if (value === undefined) value = store.load();
+    return value;
+  };
+  const set = (next: T | ((prev: T) => T)) => {
+    const v = typeof next === 'function' ? (next as (prev: T) => T)(get()) : next;
+    if (Object.is(v, value)) return;
+    value = v;
+    store.save(v);
+    listeners.forEach((l) => l());
+  };
+  const subscribe = (l: () => void) => {
+    listeners.add(l);
+    return () => { listeners.delete(l); };
+  };
+  return {
+    get,
+    set,
+    reset() {
+      store.clear();
+      value = initial;
+      listeners.forEach((l) => l());
+    },
+    subscribe,
+    use() {
+      return [useSyncExternalStore(subscribe, get, () => initial), set];
     },
   };
 }
