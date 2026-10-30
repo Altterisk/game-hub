@@ -2,7 +2,7 @@ import { Children, useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
   Box, Divider, Flex, HStack, Image, Input, Menu, MenuButton, MenuItem, MenuList,
   Portal, Spinner, Text, Tooltip, VStack,
-} from '@chakra-ui/react';
+} from './ui/index.js';
 
 export type ViewerIconName =
   | 'play' | 'pause' | 'reload' | 'save' | 'loop' | 'bg' | 'face' | 'body' | 'store'

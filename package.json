@@ -1,6 +1,6 @@
 {
   "name": "@altterisk/game-hub",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "license": "AGPL-3.0-or-later",
   "private": true,
   "type": "module",
@@ -72,6 +72,12 @@
       "types": "./dist/text.d.ts",
       "default": "./dist/text.js"
     },
+    "./ui": {
+      "types": "./dist/ui/index.d.ts",
+      "default": "./dist/ui/index.js"
+    },
+    "./ui.css": "./styles/ui.css",
+    "./ui-reset.css": "./styles/ui-reset.css",
     "./hub.css": "./styles/hub.css",
     "./base.css": "./styles/base.css",
     "./components.css": "./styles/components.css"
@@ -85,6 +91,7 @@
   ],
   "scripts": {
     "build:lib": "tsc -p tsconfig.lib.json",
+    "gen:ui": "node scripts/gen-ui.mjs",
     "prepare": "npm run build:lib",
     "dev": "vite",
     "build": "npm run build:lib && vite build",

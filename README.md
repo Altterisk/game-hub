@@ -30,6 +30,7 @@ another.
 | `@altterisk/game-hub/filters` | Tri-state filters, text search, URL-backed list state |
 | `@altterisk/game-hub/archive` | `.tar.br` asset archives (needs `brotli-dec-wasm` in the site) |
 | `@altterisk/game-hub/meta`, `/meta/dom`, `/meta/next`, `/build`, `/time`, `/audio`, `/text` | SEO head tags and build files, event phases, one-at-a-time audio, game-text markup (see "Framework modules") |
+| `@altterisk/game-hub/ui`, `/ui.css`, `/ui-reset.css` | Chakra-compatible components and style props without Chakra (see "UI kit") |
 | `@altterisk/game-hub/spine` | Pixi/Spine viewer primitives (the site passes its own `pixi.js` and `spine-pixi-v8`) |
 | `@altterisk/game-hub/viewer` | Chakra v2 viewer chrome: labelled control panel pieces, layer panel, `ViewerShell` (needs `@chakra-ui/react` in the site) |
 
@@ -169,8 +170,7 @@ onTransform })`, `zoomAt`, `mappedSourcePixelScale`, `attachmentScales`, `percen
 
 ### `/viewer`
 
-Chakra v2 components for a viewer's control panel; `@chakra-ui/react` is an optional peer, so
-plain-CSS sites never load it. Colours use `accent.*`; all text comes in through props.
+Components for a viewer's control panel, built on `/ui` (no Chakra) since v0.6.0. Colours use `accent.*`; all text comes in through props.
 
 - `ViewerShell({ stage, panel, height, theater, onTheaterChange, labels })`: stage beside a
   scrolling panel on `lg`+, stacked on phones; theatre mode fills the window with the stage
@@ -251,6 +251,61 @@ From a CommonJS script, load it with `await import('@altterisk/game-hub/build')`
 - Root: `StoryLines({ lines })` (place, narration, choice, options with branches, speaker rows;
   the site maps its data to `StoryLineView` and renders text) and
   `VoiceLineList({ items, playing, onPlay, onStop })`.
+## UI kit (`/ui`, v0.6.0): Chakra-free components
+
+`@altterisk/game-hub/ui` replaces Chakra UI v2 with the same component names and props,
+so moving a site off Chakra is mostly an import swap (`@chakra-ui/react` and
+`@chakra-ui/icons` → `@altterisk/game-hub/ui`). There is no runtime styling engine: no
+emotion, no framer-motion.
+
+**CSS.** Import once, in this order: `ui-reset.css` (Chakra's element reset, MIT), `ui.css`,
+then `hub.css` and `components.css`. `ui.css` is generated: `npm run gen:ui` (after
+`build:lib`) compiles the hub Chakra theme (Chakra defaults + `hubChakraTheme`) into static
+classes. Change looks in `src/chakra.ts` or `scripts/gen-ui.mjs`, never in `ui.css`.
+- Accent colours are CSS variables per `[data-game]`, so one stylesheet serves every site.
+- Dark mode only (`_dark` theme values are merged in, `_light` dropped).
+
+**Style props.** Chakra names and theme tokens (`p={4}`, `color="gray.500"`,
+`bg="accent.300"`, `fontSize="sm"`, `borderRadius="md"`, `bgGradient="linear(to-t, …)"`):
+- Single values become inline styles.
+- Responsive values (`{ base, md }` or arrays) become `--r-<prop>-<bp>` variables plus
+  generated classes, for the props listed in `RESPONSIVE` in the generator.
+- `_hover`, `_focus`, `_focusVisible`, `_active`, `_disabled`, `_placeholder`, `_groupHover`,
+  `_selected` and `_checked` work for the props states usually change (`STATE_PROPS`).
+- `sx` takes flat style props only. Nested selectors and media queries go in site CSS.
+- `noOfLines` clamps.
+
+**Components.**
+- Layout: `Box`, `Flex`, `Stack`/`VStack`/`HStack`, `Center`, `Spacer`, `Grid`/`GridItem`,
+  `SimpleGrid`, `Wrap`/`WrapItem`, `Container`, `AspectRatio`, `Divider`, `Text`,
+  `Heading` (responsive `size` works), `Link`, `Image` (`fallback`, `fallbackSrc`), `Portal`,
+  `Collapse`, `VisuallyHidden`.
+- Controls: `Button`, `IconButton`, `ButtonGroup`, `CloseButton`, `Badge`, `Tag*`, `Spinner`,
+  `Avatar`, `Icon` and the Chakra icon set (`ChevronDownIcon`, …).
+- Forms: `Input`, `InputGroup` with elements and addons, `Textarea`, `Select`, `Checkbox`,
+  `NumberInput*`, `useNumberInput`, `Slider*`.
+- Overlays: `Tooltip`, `Popover*` (click or hover), `Menu*`, `Modal*` (focus moves to the
+  dialog, Tab is trapped, Escape closes, focus returns).
+- Disclosure: `Accordion*`, `Tabs*`.
+- Data: `Table*`, `Card*`, `Stat*`.
+- Hooks: `useDisclosure`, `useClipboard`, `useBreakpointValue`, `useMediaQuery`,
+  `useToast` + `<Toaster />`.
+
+**Behaviour that matches Chakra on purpose:**
+- `Stack` spaces children with sibling margins (classes per space token and breakpoint;
+  off-scale values fall back to `gap`).
+- `Stack`/`Wrap` spacing and `AspectRatio` fill win over a child's own style props, as in Chakra.
+- Tabs and accordion items find their index through the direct child they sit in, so
+  wrapper components work.
+- Themed parts carry `ui-<component>__<part>` plus `ui-<component>--size-<s>`,
+  `--<variant>` and `--<variant>-<scheme>`.
+
+**Not supported:** `extendTheme`, color-mode switching, framer motion props, theme
+`layerStyle`/`textStyle`.
+
+`/viewer` is built on `/ui` since v0.6.0, so it no longer needs Chakra. `/chakra`
+(`hubChakraTheme`) stays for sites still on Chakra; `@chakra-ui/react` is a dev dependency here
+only because the generator reads its theme.
 ## Wiring
 
 ### Aigis (Vite + React Router)
