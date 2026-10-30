@@ -1,4 +1,4 @@
-export type GameId = 'aigis' | 'lo' | 'mad';
+export type GameId = 'aigis' | 'lo' | 'mad' | 'taimanin';
 
 export interface GameSection {
   label: string;
@@ -77,6 +77,24 @@ export const GAMES: Game[] = [
       { label: 'Characters', path: '/characters/' },
       { label: 'Stages', path: '/stages/' },
       { label: 'Farm', path: '/farm/' },
+    ],
+  },
+  {
+    id: 'taimanin',
+    name: 'Taimanin RPGX Database',
+    title: 'Taimanin RPGX',
+    tagline: 'Units, events, banners, story and scenes (18+)',
+    url: 'https://taimanin.altterisk.cc',
+    icon: '/icons/taimanin.png',
+    accent: '#e879f9',
+    source: 'https://github.com/anyabot/Taimanin-RPGX-Database',
+    sections: [
+      { label: 'Units', path: '/units' },
+      { label: 'Events', path: '/events' },
+      { label: 'Banners', path: '/banners' },
+      { label: 'Story', path: '/story' },
+      { label: 'Quests', path: '/quests' },
+      { label: 'Buffs', path: '/buffs' },
     ],
   },
 ];

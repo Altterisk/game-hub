@@ -18,7 +18,7 @@ function Hub() {
         <header className="landing__head">
           <h1>Altterisk Games</h1>
           <p className="hub-muted">
-            Fan-made databases and tools for Millennium War Aigis, Last Origin and Make Drama.
+            Fan-made databases and tools for Millennium War Aigis, Last Origin, Make Drama and Taimanin RPGX.
           </p>
         </header>
         <div className="landing__grid">

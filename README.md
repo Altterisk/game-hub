@@ -13,6 +13,7 @@ another.
 | Aigis Database | Altterisk/Aigis-Enemy | aigis.altterisk.cc | `#7aa2f7` |
 | LOMapR | anyabot/LOMapR | lo.altterisk.cc | `#f2727f` |
 | MAD Viewer | anyabot/MAD-Viewer | mad.altterisk.cc | `#f6c445` |
+| Taimanin RPGX Database | anyabot/Taimanin-RPGX-Database | taimanin.altterisk.cc | `#e879f9` |
 
 ## What's in it
 
