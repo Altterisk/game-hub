@@ -329,7 +329,7 @@ import { HubBar, HubFooter } from '@altterisk/game-hub';
 React Router's `NavLink` adds `class="active"`, which the bar already styles.
 
 Chrome text defaults to English. Translate it with `labels` on `HubBar`
-(`switchGame`, `allGames`, `here`) and `HubFooter` (`source`, `portfolio`,
+(`switchGame`, `allGames`, `here`) and `HubFooter` (`source`, `portfolio`, `donate`,
 `allGames`). Pass `homeHref` when the site is served under a base path; the
 switcher's own-site entry and the default home link use it.
 

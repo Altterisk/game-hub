@@ -9,6 +9,7 @@ export interface FooterLink {
 export interface HubFooterLabels {
   source: string;
   portfolio: string;
+  donate: string;
   allGames: string;
   /** Legal line when the game has a named rights holder. */
   rights: (owner: string, title: string) => string;
@@ -22,6 +23,7 @@ export const LICENSE_NAME = 'AGPL-3.0';
 const DEFAULT_LABELS: HubFooterLabels = {
   source: 'Source',
   portfolio: 'Portfolio',
+  donate: 'Ko-fi',
   allGames: 'All games',
   rights: (owner, title) =>
     `Fan-made and unofficial. ${title} images, data and other game assets are the property of ${owner}. All rights belong to ${owner}.`,
@@ -56,6 +58,7 @@ export function HubFooter({ game, links, note, legal, labels }: HubFooterProps) 
   const own = links ?? [
     { label: text.source, href: g.source },
     { label: text.portfolio, href: 'https://altterisk.github.io/portfolio/' },
+    { label: text.donate, href: HUB.donate },
   ];
   const legalLine = legal ?? (
     <>
