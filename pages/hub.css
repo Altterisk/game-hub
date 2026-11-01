@@ -34,3 +34,16 @@
 .landing__chip:hover { border-color: var(--hub-accent-line); color: var(--hub-accent); text-decoration: none; }
 
 .landing__open { margin-top: auto; align-self: flex-start; }
+
+.landing__support {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 14px;
+  margin-top: 24px;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+.landing__kofi { gap: 6px; background: #ff5e5b; border-color: #ff5e5b; color: #fff; }
+.landing__kofi:hover { background: color-mix(in srgb, #ff5e5b 85%, white); color: #fff; }

@@ -27,6 +27,7 @@ export const HUB = {
   url: HUB_URL,
   accent: '#a5b4fc',
   source: 'https://github.com/Altterisk/game-hub',
+  donate: 'https://ko-fi.com/altterisk',
 };
 
 export const GAMES: Game[] = [
@@ -75,6 +76,7 @@ export const GAMES: Game[] = [
     icon: '/icons/mad.png',
     accent: '#f6c445',
     source: 'https://github.com/anyabot/MAD-Viewer',
+    rights: 'FluffyDuck and Wemade Connect',
     sections: [
       { label: 'Viewer', path: '/' },
       { label: 'Characters', path: '/characters/' },
