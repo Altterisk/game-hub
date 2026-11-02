@@ -22,7 +22,7 @@ describe('HubFooter legal line', () => {
   });
 
   it('uses generic wording without a rights holder, and on the hub', () => {
-    expect(rightsText('mad')).toMatch(/respective owners/);
+    expect(rightsText('aigis')).toMatch(/respective owners/);
     expect(rightsText('hub')).toMatch(/respective owners/);
   });
 

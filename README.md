@@ -240,6 +240,13 @@ From a CommonJS script, load it with `await import('@altterisk/game-hub/build')`
   `reset`, `use()`: one saved preference shared by every reader (`useSyncExternalStore`;
   `initial` on the server). Bare strings stored before adoption reach `sanitize` as text.
   Also `saveBlob(blob, fileName)`.
+- `/sync`: `createDriveSync({ clientId, fileName, entries })` saves listed stores to one JSON file
+  in the signed-in user's Google Drive app folder (`drive.appdata`), with no server. Each entry is
+  `{ key, read, write, subscribe, isEmpty }`; `read` returns the saved value. The newer copy wins
+  per entry; a device that never synced and holds different data gets `status: 'conflict'` and
+  `resolve('local' | 'remote')`. Syncs on start, a few seconds after a change, and when the tab
+  regains focus. Browser tokens last about an hour, then `status: 'expired'` until `connect()`;
+  edits made meanwhile upload on reconnect. Also `start`, `disconnect`, `syncNow`, `use()`.
 - `/time`: `phaseOf({ start, end, stagesEnd }, now)` → `upcoming | running | exchange | ended`
   (a date-only end counts the whole day), `untilNext`, `formatRemaining(ms, units)`,
   `useNow(interval)` (`null` until hydrated), `<LiveBadge window labels countdown>`.

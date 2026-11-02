@@ -1,6 +1,6 @@
 {
   "name": "@altterisk/game-hub",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "license": "AGPL-3.0-or-later",
   "private": true,
   "type": "module",
@@ -59,6 +59,10 @@
     "./build": {
       "types": "./dist/build.d.ts",
       "default": "./dist/build.js"
+    },
+    "./sync": {
+      "types": "./dist/sync.d.ts",
+      "default": "./dist/sync.js"
     },
     "./time": {
       "types": "./dist/time.d.ts",
