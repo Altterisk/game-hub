@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy — Altterisk Games</title>
+    <meta name="description" content="What the Altterisk game sites store, and how Google Drive sync handles your data." />
+    <link rel="canonical" href="https://hub.altterisk.cc/privacy" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles/hub.css" />
+    <link rel="stylesheet" href="/styles/base.css" />
+    <link rel="stylesheet" href="/styles/components.css" />
+    <style>
+      .privacy { max-width: 720px; padding-top: clamp(32px, 6vh, 64px); padding-bottom: 64px; }
+      .privacy h1 { font-size: clamp(28px, 5vw, 38px); font-weight: 800; margin-bottom: 8px; }
+      .privacy h2 { font-size: 18px; font-weight: 700; margin: 28px 0 8px; }
+      .privacy p, .privacy li { line-height: 1.6; }
+      .privacy ul { padding-left: 20px; }
+    </style>
+  </head>
+  <body>
+    <main class="hub-main privacy">
+      <p><a href="/">← Altterisk Games</a></p>
+      <h1>Privacy</h1>
+      <p class="hub-muted">Applies to hub.altterisk.cc and the game sites linked from it. Last updated 2 November 2026.</p>
+
+      <h2>What the sites store</h2>
+      <p>Settings and progress you enter, such as farm plans, collections and parties, are saved in your browser's
+        local storage on your device. They are not sent to us. Clearing your browser data removes them.</p>
+
+      <h2>Google Drive sync</h2>
+      <p>Sync is optional and off until you sign in with Google. When you sign in, the site asks Google for two things:</p>
+      <ul>
+        <li><strong>Its own app folder in your Google Drive</strong> (<code>drive.appdata</code>). The site saves one file
+          there with your saved progress, so another device signed in to the same account can load it. It cannot see or
+          change any other file in your Drive.</li>
+        <li><strong>Your email address</strong>, shown in the Sync menu so you can tell which account is connected.</li>
+      </ul>
+      <p>This runs entirely in your browser, between your device and Google. No server of ours receives your data,
+        your email or your Google sign-in. The sign-in token is kept in your browser's local storage until it
+        expires or you sign out.</p>
+      <p>Sign out from the Sync menu to stop syncing. To delete the synced file, open Google Drive, go to
+        Settings → Manage apps, and choose “Delete hidden app data” for the app. You can also remove the app's
+        access at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</p>
+      <p>Use of information received from Google APIs follows the
+        <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>,
+        including the Limited Use requirements. The data is used only to sync your progress and is never shared,
+        sold or used for advertising.</p>
+
+      <h2>Hosting and third parties</h2>
+      <p>The sites are hosted on Cloudflare Pages, which processes standard request data such as your IP address
+        under <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare's privacy policy</a>. Fonts load from
+        Google Fonts. Game art and audio on some sites load from the game's own servers. Donations through Ko-fi are
+        handled by Ko-fi under its own policy.</p>
+
+      <h2>Contact</h2>
+      <p>Questions: open an issue at <a href="https://github.com/Altterisk/game-hub/issues">github.com/Altterisk/game-hub</a>.</p>
+    </main>
+  </body>
+</html>

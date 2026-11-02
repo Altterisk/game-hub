@@ -53,7 +53,7 @@ export function Landing() {
           </a>
         </aside>
       </main>
-      <HubFooter game="hub" />
+      <HubFooter game="hub" note={<a href="/privacy">Privacy</a>} />
     </>
   );
 }

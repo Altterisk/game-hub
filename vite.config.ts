@@ -12,7 +12,10 @@ export default defineConfig({
   plugins: [
     react(),
     prerenderPlugin({
-      pages: () => ({ pages: [{ path: '/', tags: HUB_TAGS, body: renderToString(createElement(Landing)) }] }),
+      pages: () => ({
+        pages: [{ path: '/', tags: HUB_TAGS, body: renderToString(createElement(Landing)) }],
+        extraUrls: [`${HUB_URL}/privacy`],
+      }),
       url: (path) => HUB_URL + path,
       origin: HUB_URL,
     }),
@@ -21,7 +24,7 @@ export default defineConfig({
     outDir: 'dist-site',
     rollupOptions: {
       // demo.html is dev-only: `npm run dev` serves it, the deployed hub never includes it.
-      input: { index: resolve(__dirname, 'index.html') },
+      input: { index: resolve(__dirname, 'index.html'), privacy: resolve(__dirname, 'privacy.html') },
     },
   },
 });

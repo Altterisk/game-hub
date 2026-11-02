@@ -383,7 +383,8 @@ npm test         # vitest: codec golden tests, loaders, persistence, filters, ar
 Deployed by Cloudflare Pages on every push to `main` (build `npm run build`,
 output `dist-site`, custom domain `hub.altterisk.cc`). Only the hub page is built and deployed;
 `demo.html` is local-only (`npm run dev`). `vite build` prerenders the hub page (`pages/Landing.tsx`)
-with its head tags from `pages/hubMeta.ts` and writes `sitemap.xml` and `robots.txt`. The demo page renders the real bar and sample
+with its head tags from `pages/hubMeta.ts` and writes `sitemap.xml` and `robots.txt`.
+`privacy.html` is the privacy policy the Google OAuth consent screen links to. The demo page renders the real bar and sample
 components in each game's accent; it is the reference for the restyle.
 
 ## License
