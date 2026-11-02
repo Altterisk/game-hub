@@ -248,3 +248,55 @@ describe('useNow', () => {
     expect(renders).toBeLessThanOrEqual(3);
   });
 });
+describe('HubBar menu drawer', () => {
+  const menu = [
+    { items: [{ href: '/a', label: 'Alpha', active: true }, { href: '/b', label: 'Beta' }] },
+    { title: 'More', items: [{ href: '#c', label: 'Gamma' }] },
+  ];
+
+  it('opens a drawer with the actions and every link, and closes on a link, Escape or the overlay', () => {
+    render(
+      <SiteShell game="mad" nav={<a href="/a">Alpha</a>} actions={<button type="button">Act</button>} menu={menu}>
+        <p>page</p>
+      </SiteShell>,
+    );
+    expect(document.querySelector('.hub-bar--menu')).toBeTruthy();
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+    const dialog = screen.getByRole('dialog', { name: 'Menu' });
+    expect(document.activeElement?.getAttribute('aria-label')).toBe('Close menu');
+    expect(document.body.style.overflow).toBe('hidden');
+    expect(dialog.querySelector('[aria-current="page"]')?.textContent).toBe('Alpha');
+    expect(dialog.textContent).toContain('More');
+    expect(dialog.textContent).toContain('Act');
+
+    fireEvent.click(screen.getByRole('link', { name: 'Gamma' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(document.body.style.overflow).toBe('');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+    fireEvent.click(document.querySelector('.hub-drawer__overlay')!);
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('uses the router link and translated labels', () => {
+    const Link = ({ href, children, ...rest }: { href: string; children: React.ReactNode }) =>
+      <a href={href} data-router="yes" {...rest}>{children}</a>;
+    render(<SiteShell game="mad" menu={menu} renderLink={routerLinks(Link)}
+      barLabels={{ menu: '메뉴', closeMenu: '닫기' }}><p>page</p></SiteShell>);
+    fireEvent.click(screen.getByRole('button', { name: '메뉴' }));
+    expect(screen.getByRole('link', { name: 'Beta' }).getAttribute('data-router')).toBe('yes');
+    expect(screen.getByRole('button', { name: '닫기' })).toBeTruthy();
+  });
+
+  it('adds nothing without a menu', () => {
+    render(<SiteShell game="mad" nav={<a href="/a">Alpha</a>}><p>page</p></SiteShell>);
+    expect(document.querySelector('.hub-bar--menu')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Menu' })).toBeNull();
+  });
+});

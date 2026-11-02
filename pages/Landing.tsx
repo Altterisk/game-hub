@@ -13,6 +13,7 @@ export function Landing() {
         nav={GAMES.map((g) => (
           <a key={g.id} href={g.url}>{g.title}</a>
         ))}
+        menu={[{ items: GAMES.map((g) => ({ href: g.url, label: g.title })) }]}
       />
       <main className="hub-main landing">
         <header className="landing__head">

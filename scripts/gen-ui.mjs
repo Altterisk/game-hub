@@ -193,7 +193,7 @@ const INTRINSIC = `
 .ui-close-button { outline: 0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .ui-table-container { display: block; white-space: nowrap; -webkit-overflow-scrolling: touch; overflow-x: auto; overflow-y: hidden; max-width: 100%; }
 .ui-tooltip { position: fixed; z-index: 1800; pointer-events: none; }
-.ui-popover__popper { z-index: 1500; }
+.ui-popover__popper.ui-popover__popper { z-index: 1500; }
 .ui-slider__container { display: inline-block; position: relative; cursor: pointer; }
 .ui-slider__track { overflow: hidden; }
 .ui-slider__thumb { display: flex; align-items: center; justify-content: center; position: absolute; outline: 0; }

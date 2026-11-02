@@ -4,7 +4,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import type { GameId } from './games.js';
-import { HubBar, type HomeLinkProps, type HubBarLabels } from './HubBar.js';
+import { HubBar, type HomeLinkProps, type HubBarLabels, type HubMenuGroup } from './HubBar.js';
 import { HubFooter, type HubFooterProps } from './HubFooter.js';
 import { EmptyState, plainLink, type LinkProps, type RenderLink } from './page.js';
 
@@ -339,6 +339,8 @@ export interface SiteShellProps {
   renderHomeLink?: (props: HomeLinkProps) => ReactNode;
   homeHref?: string;
   barLabels?: Partial<HubBarLabels>;
+  menu?: HubMenuGroup[];
+  renderLink?: RenderLink;
   footer?: Omit<HubFooterProps, 'game'>;
   /** Clears a caught page error when it changes; pass the route path. */
   resetKey?: unknown;
@@ -357,13 +359,14 @@ export interface SiteShellProps {
 
 /** Bar, skip link, `<main>` with an error boundary, footer: the whole frame of a site page. */
 export function SiteShell({
-  game, nav, actions, logo, renderHomeLink, homeHref, barLabels, footer, resetKey, errorLabels,
+  game, nav, actions, logo, renderHomeLink, homeHref, barLabels, menu, renderLink, footer, resetKey, errorLabels,
   skipLabel = 'Skip to content', scrollTop, contained = true, contentWidth, belowBar, children,
 }: SiteShellProps) {
   return (
     <div className="hub-shell" data-game={game}>
       <a className="hub-skip" href="#hub-main">{skipLabel}</a>
-      <HubBar game={game} nav={nav} actions={actions} logo={logo} renderHomeLink={renderHomeLink} homeHref={homeHref} labels={barLabels} />
+      <HubBar game={game} nav={nav} actions={actions} logo={logo} renderHomeLink={renderHomeLink} homeHref={homeHref}
+        labels={barLabels} menu={menu} renderLink={renderLink} />
       {belowBar}
       <main id="hub-main" className="hub-shell__main" tabIndex={-1}>
         <ErrorBoundary resetKey={resetKey} labels={errorLabels}>

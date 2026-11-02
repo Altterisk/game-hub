@@ -222,8 +222,13 @@ From a CommonJS script, load it with `await import('@altterisk/game-hub/build')`
 
 ### App shell (root export, styled by `hub.css`)
 
-- `SiteShell({ game, nav, actions, renderHomeLink, footer, belowBar, resetKey, contentWidth, scrollTop, contained })`:
+- `SiteShell({ game, nav, actions, menu, renderLink, renderHomeLink, footer, belowBar, resetKey, contentWidth, scrollTop, contained })`:
   skip link, `HubBar`, `<main id="hub-main">` inside an `ErrorBoundary`, `HubFooter`.
+- `menu: [{ title?, items: [{ href, label, active }] }]` on `SiteShell` or `HubBar`: below 768px the
+  nav row and actions give way to a menu button opening a left drawer with the actions on top and
+  every link below (`renderLink` for the router link). It closes on a link, Escape, the overlay or a
+  wider screen. The actions render in both places, so keep one-off dialogs out of them. Labels
+  `menu`, `closeMenu` in `barLabels`.
 - `ErrorBoundary({ resetKey, fallback, onError, labels })`: a retry panel instead of a blank
   page; a new `resetKey` (the route path) clears it.
 - `NotFound({ title, hint, homeHref, renderLink })`. Set `noindex` through `/meta`.
@@ -336,7 +341,7 @@ import { HubBar, HubFooter } from '@altterisk/game-hub';
 React Router's `NavLink` adds `class="active"`, which the bar already styles.
 
 Chrome text defaults to English. Translate it with `labels` on `HubBar`
-(`switchGame`, `allGames`, `here`) and `HubFooter` (`source`, `portfolio`, `donate`,
+(`switchGame`, `allGames`, `here`, `menu`, `closeMenu`) and `HubFooter` (`source`, `portfolio`, `donate`,
 `allGames`). Pass `homeHref` when the site is served under a base path; the
 switcher's own-site entry and the default home link use it.
 

@@ -1,6 +1,6 @@
 export { GAMES, HUB, HUB_URL, getGame, type Game, type GameId, type GameSection } from './games.js';
 export { tokens, gray, accentScale, type AccentScale } from './tokens.js';
-export { HubBar, GameMark, GameIcon, type HubBarProps, type HubBarLabels, type HomeLinkProps } from './HubBar.js';
+export { HubBar, GameMark, GameIcon, type HubBarProps, type HubBarLabels, type HomeLinkProps, type HubMenuGroup, type HubMenuItem } from './HubBar.js';
 export { HubFooter, rightsText, licenseUrl, LICENSE_NAME, type HubFooterProps, type HubFooterLabels, type FooterLink } from './HubFooter.js';
 export {
   SearchBox, FilterRow, FilterChip, SegmentedButtons, GroupCard, CheckboxGroup, Pager, CardGrid, FallbackImage, CopyButton, ShareButton, copyText,
