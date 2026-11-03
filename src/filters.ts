@@ -177,11 +177,31 @@ export function useUrlText(list: ListState, ready: boolean, key = 'q', delayMs =
   // Values written here that the URL has not caught up with; any other URL value is an outside change.
   const sent = useRef<string[]>([]);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingWrite = useRef<(() => void) | null>(null);
   const latest = useRef(list);
   latest.current = list;
   const urlValue = list.text(key);
   const cancel = () => { if (timer.current) { clearTimeout(timer.current); timer.current = null; } };
-  useEffect(() => cancel, []);
+  useEffect(() => {
+    // A click or key press elsewhere writes at once, so a later router.replace cannot cancel the navigation it starts.
+    const flush = (e: Event) => {
+      if (!timer.current) return;
+      if (e.type === 'keydown' && (e.target as Element | null)?.closest?.('input, textarea, select, [contenteditable]')) return;
+      cancel();
+      pendingWrite.current?.();
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener('pointerdown', flush, true);
+      document.addEventListener('keydown', flush, true);
+    }
+    return () => {
+      cancel();
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('pointerdown', flush, true);
+        document.removeEventListener('keydown', flush, true);
+      }
+    };
+  }, []);
   useEffect(() => {
     if (!ready) return;
     if (!hydrated.current) {
@@ -211,9 +231,11 @@ export function useUrlText(list: ListState, ready: boolean, key = 'q', delayMs =
     cancel();
     const write = () => {
       timer.current = null;
+      pendingWrite.current = null;
       if (next !== latest.current.text(key)) sent.current.push(next);
       latest.current.setText(key, next);
     };
+    pendingWrite.current = write;
     if (delayMs > 0) timer.current = setTimeout(write, delayMs);
     else write();
   }];

@@ -124,6 +124,23 @@ describe('useUrlText', () => {
     expect(values.q).toBe('sword');
   });
 
+  it('writes a pending value at once on a click or a key press outside a text field', () => {
+    vi.useFakeTimers();
+    const { values, adapter } = urlAdapter();
+    const { result } = renderHook(() => useUrlText(listState(adapter), true));
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    act(() => result.current[1]('sw'));
+    fireEvent.keyDown(input, { key: 'o' });
+    expect(values.q).toBeUndefined();
+    fireEvent.pointerDown(document.body);
+    expect(values.q).toBe('sw');
+    act(() => result.current[1]('sword'));
+    fireEvent.keyDown(document.body, { key: 'Enter' });
+    expect(values.q).toBe('sword');
+    input.remove();
+  });
+
   it('drops a pending write on unmount, so leaving the page is not undone', () => {
     vi.useFakeTimers();
     const { values, adapter } = urlAdapter();
