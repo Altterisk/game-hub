@@ -113,6 +113,17 @@ describe('useUrlText', () => {
     expect(values.q).toBe('sword');
   });
 
+  it('keeps text typed before the router is ready', () => {
+    vi.useFakeTimers();
+    const { values, adapter } = urlAdapter();
+    const { result, rerender } = renderHook(({ ready }) => useUrlText(listState(adapter), ready), { initialProps: { ready: false } });
+    act(() => result.current[1]('sword'));
+    rerender({ ready: true });
+    expect(result.current[0]).toBe('sword');
+    pause();
+    expect(values.q).toBe('sword');
+  });
+
   it('drops a pending write on unmount, so leaving the page is not undone', () => {
     vi.useFakeTimers();
     const { values, adapter } = urlAdapter();

@@ -172,6 +172,8 @@ export function nextRouterAdapter(router: NextRouterLike): ParamAdapter {
 export function useUrlText(list: ListState, ready: boolean, key = 'q', delayMs = 300): [string, (value: string) => void] {
   const [value, setValue] = useState('');
   const hydrated = useRef(false);
+  // The URL value last acted on, so `ready` flipping without a URL change is not mistaken for an outside edit.
+  const seen = useRef('');
   // Values written here that the URL has not caught up with; any other URL value is an outside change.
   const sent = useRef<string[]>([]);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -184,9 +186,12 @@ export function useUrlText(list: ListState, ready: boolean, key = 'q', delayMs =
     if (!ready) return;
     if (!hydrated.current) {
       hydrated.current = true;
+      seen.current = urlValue;
       setValue(urlValue);
       return;
     }
+    if (urlValue === seen.current) return;
+    seen.current = urlValue;
     const echo = sent.current.indexOf(urlValue);
     if (echo >= 0) {
       sent.current = sent.current.slice(echo + 1);
@@ -197,6 +202,11 @@ export function useUrlText(list: ListState, ready: boolean, key = 'q', delayMs =
     setValue(urlValue);
   }, [ready, urlValue]);
   return [value, (next: string) => {
+    // Typing before the router is ready leaves nothing to hydrate; the URL would only erase it.
+    if (!hydrated.current) {
+      hydrated.current = true;
+      seen.current = latest.current.text(key);
+    }
     setValue(next);
     cancel();
     const write = () => {
