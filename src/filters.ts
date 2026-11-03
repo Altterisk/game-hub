@@ -168,12 +168,18 @@ export function nextRouterAdapter(router: NextRouterLike): ParamAdapter {
 }
 
 // A text box bound to ?<key>=: read once the router is ready, then local state leads so typing never waits on the URL.
-export function useUrlText(list: ListState, ready: boolean, key = 'q'): [string, (value: string) => void] {
+// The URL write waits until typing pauses for `delayMs`: each write re-renders the whole routed page.
+export function useUrlText(list: ListState, ready: boolean, key = 'q', delayMs = 300): [string, (value: string) => void] {
   const [value, setValue] = useState('');
   const hydrated = useRef(false);
   // Values written here that the URL has not caught up with; any other URL value is an outside change.
   const sent = useRef<string[]>([]);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latest = useRef(list);
+  latest.current = list;
   const urlValue = list.text(key);
+  const cancel = () => { if (timer.current) { clearTimeout(timer.current); timer.current = null; } };
+  useEffect(() => cancel, []);
   useEffect(() => {
     if (!ready) return;
     if (!hydrated.current) {
@@ -186,12 +192,19 @@ export function useUrlText(list: ListState, ready: boolean, key = 'q'): [string,
       sent.current = sent.current.slice(echo + 1);
       return;
     }
+    cancel();
     sent.current = [];
     setValue(urlValue);
   }, [ready, urlValue]);
   return [value, (next: string) => {
     setValue(next);
-    if (next !== urlValue) sent.current.push(next);
-    list.setText(key, next);
+    cancel();
+    const write = () => {
+      timer.current = null;
+      if (next !== latest.current.text(key)) sent.current.push(next);
+      latest.current.setText(key, next);
+    };
+    if (delayMs > 0) timer.current = setTimeout(write, delayMs);
+    else write();
   }];
 }

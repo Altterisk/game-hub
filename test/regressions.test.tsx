@@ -53,10 +53,16 @@ describe('useUrlText', () => {
     return { values, adapter };
   }
 
+  afterEach(() => { vi.useRealTimers(); });
+  const pause = () => act(() => { vi.advanceTimersByTime(300); });
+
   it('follows a change made elsewhere (clear filters, back/forward)', () => {
+    vi.useFakeTimers();
     const { values, adapter } = urlAdapter();
     const { result, rerender } = renderHook(() => useUrlText(listState(adapter), true));
     act(() => result.current[1]('sword'));
+    pause();
+    rerender();
     expect(values.q).toBe('sword');
     delete values.q;
     rerender();
@@ -67,13 +73,17 @@ describe('useUrlText', () => {
   });
 
   it('does not jump back while its own writes are still landing', () => {
+    vi.useFakeTimers();
     const { values, adapter } = urlAdapter();
     const writes: (string | null)[] = [];
     const lagging: ParamAdapter = { get: adapter.get, set: (u) => { writes.push(u.q ?? null); } };
     const { result, rerender } = renderHook(() => useUrlText(listState(lagging), true));
     act(() => result.current[1]('a'));
+    pause();
     act(() => result.current[1]('ab'));
+    pause();
     act(() => result.current[1]('abc'));
+    pause();
     values.q = 'a';
     rerender();
     expect(result.current[0]).toBe('abc');
@@ -84,6 +94,45 @@ describe('useUrlText', () => {
     rerender();
     expect(result.current[0]).toBe('abc');
     expect(writes).toEqual(['a', 'ab', 'abc']);
+  });
+
+  it('writes the URL once when typing pauses, not on every keystroke', () => {
+    vi.useFakeTimers();
+    const { values, adapter } = urlAdapter();
+    const writes: (string | null)[] = [];
+    const counting: ParamAdapter = { get: adapter.get, set: (u) => { writes.push(u.q ?? null); adapter.set(u); } };
+    const { result } = renderHook(() => useUrlText(listState(counting), true));
+    for (const v of ['s', 'sw', 'swo', 'swor', 'sword']) {
+      act(() => result.current[1](v));
+      act(() => { vi.advanceTimersByTime(100); });
+    }
+    expect(result.current[0]).toBe('sword');
+    expect(writes).toEqual([]);
+    pause();
+    expect(writes).toEqual(['sword']);
+    expect(values.q).toBe('sword');
+  });
+
+  it('drops a pending write on unmount, so leaving the page is not undone', () => {
+    vi.useFakeTimers();
+    const { values, adapter } = urlAdapter();
+    const { result, unmount } = renderHook(() => useUrlText(listState(adapter), true));
+    act(() => result.current[1]('sword'));
+    unmount();
+    pause();
+    expect(values.q).toBeUndefined();
+  });
+
+  it('lets a change made elsewhere cancel a pending write', () => {
+    vi.useFakeTimers();
+    const { values, adapter } = urlAdapter();
+    const { result, rerender } = renderHook(() => useUrlText(listState(adapter), true));
+    act(() => result.current[1]('sword'));
+    values.q = 'shield';
+    rerender();
+    pause();
+    expect(values.q).toBe('shield');
+    expect(result.current[0]).toBe('shield');
   });
 });
 

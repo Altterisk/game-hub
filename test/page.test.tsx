@@ -145,6 +145,7 @@ describe('states and list parts', () => {
 
 describe('useUrlText', () => {
   it('hydrates once when ready, then local state leads', () => {
+    vi.useFakeTimers();
     const a = memory({ q: 'val' });
     const { result, rerender } = renderHook(({ ready }) => useUrlText(listState(a), ready), { initialProps: { ready: false } });
     expect(result.current[0]).toBe('');
@@ -152,7 +153,10 @@ describe('useUrlText', () => {
     expect(result.current[0]).toBe('val');
     act(() => result.current[1]('valk'));
     expect(result.current[0]).toBe('valk');
+    expect(a.values.q).toBe('val');
+    act(() => { vi.advanceTimersByTime(300); });
     expect(a.values.q).toBe('valk');
+    vi.useRealTimers();
     a.values.q = 'changed elsewhere';
     rerender({ ready: true });
     expect(result.current[0]).toBe('changed elsewhere');

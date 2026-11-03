@@ -139,7 +139,7 @@ in through props or `labels`. Anything that renders a link takes `renderLink` (d
 - Lists: `ListToolbar({ search, count, actions, activeFilters, onClearFilters })`,
   `FilterPanel({ open, onToggle, activeCount, phoneOnly })` (collapsible; with `phoneOnly`, always
   open from 768px), `EntityTile({ href, icon, title, subtitle, badges })`. `/filters` adds
-  `useUrlText(list, ready, key)` for a search box that hydrates from the URL once and then leads.
+  `useUrlText(list, ready, key, delayMs = 300)` for a search box that hydrates from the URL once and then leads; the URL write waits until typing pauses.
 - Stage pages: `BannerCard({ href, art, title, badge, window, count, highlight })`,
   `IconPreview({ label, count, max })` (capped icon row with "+N"),
   `StageCard({ href, title, id, meta, previews })`, `RewardGrid({ items })` (`amount`, `chance`
