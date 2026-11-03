@@ -160,6 +160,14 @@ describe('overlays', () => {
     expect(screen.getByRole('button', { name: 'Open' }).getAttribute('aria-expanded')).toBe('false');
   });
 
+  it('menu button with a custom element passes no unset button props to the DOM', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    render(<Menu><MenuButton as={Box} role="button" tabIndex={0}>Pick</MenuButton><MenuList><MenuItem>One</MenuItem></MenuList></Menu>);
+    expect(screen.getByRole('button', { name: 'Pick' }).tagName).toBe('DIV');
+    expect(error).not.toHaveBeenCalled();
+    error.mockRestore();
+  });
+
   it('modal traps escape, labels itself, restores focus', async () => {
     vi.useFakeTimers();
     function H() {

@@ -264,7 +264,9 @@ export const MenuButton = forwardRef<any, UIProps<'button'> & ThemingProps & { i
   const ctx = useContext(MenuContext)!;
   const isCustom = as && as !== 'button';
   const { size, variant, colorScheme, isDisabled, isActive, leftIcon, rightIcon, icon, ...own } = props;
-  const passThrough = isCustom ? { size, variant, colorScheme, isDisabled, isActive, leftIcon, rightIcon, icon } : { disabled: isDisabled };
+  const passThrough = isCustom
+    ? Object.fromEntries(Object.entries({ size, variant, colorScheme, isDisabled, isActive, leftIcon, rightIcon, icon }).filter(([, v]) => v !== undefined))
+    : { disabled: isDisabled };
   const { domProps: ownDom } = useUIProps(own, isCustom ? undefined : cx('ui-menu__button', ctx.mods));
   const domProps = { ...ownDom, ...passThrough };
   const common = {
