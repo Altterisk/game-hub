@@ -32,10 +32,12 @@ export interface DriveSyncOptions {
   delayMs?: number;
   storage?: () => Storage | null;
   fetch?: typeof fetch;
-  // Defaults to Google Identity Services; `silent` asks without a consent screen.
-  requestToken?: (silent: boolean) => Promise<SyncToken>;
+  // Defaults to Google Identity Services; `silent` asks without a consent screen, `hint` names the account.
+  requestToken?: (silent: boolean, hint?: string | null) => Promise<SyncToken>;
   revokeToken?: (token: string) => void;
   now?: () => number;
+  // Least time between automatic renewal popups; `connect()` is never limited.
+  autoRenewEveryMs?: number;
 }
 
 export interface DriveSync {
@@ -55,6 +57,7 @@ interface Meta {
   token: SyncToken | null;
   fileId: string | null;
   lastSync: number | null;
+  renewedAt: number | null;
   times: Record<string, number>;
 }
 
@@ -68,19 +71,21 @@ export const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.appdata openid
 const FILES = 'https://www.googleapis.com/drive/v3/files';
 const UPLOAD = 'https://www.googleapis.com/upload/drive/v3/files';
 const GIS_SRC = 'https://accounts.google.com/gsi/client';
+const RENEW_BEFORE_MS = 5 * 60_000;
+const AUTO_RENEW_EVERY_MS = 24 * 60 * 60_000;
 
 class AuthError extends Error {}
 class MissingFile extends Error {}
 
 const OFF: SyncState = { status: 'off', email: null, lastSync: null, error: null, conflicts: [] };
-const NO_META: Meta = { connected: false, email: null, token: null, fileId: null, lastSync: null, times: {} };
+const NO_META: Meta = { connected: false, email: null, token: null, fileId: null, lastSync: null, renewedAt: null, times: {} };
 
 interface GisTokenResponse { access_token?: string; expires_in?: string | number; error?: string }
 interface Gis {
   accounts: {
     oauth2: {
       initTokenClient(config: {
-        client_id: string; scope: string; prompt?: string;
+        client_id: string; scope: string; prompt?: string; login_hint?: string;
         callback: (r: GisTokenResponse) => void; error_callback?: (e: { type: string }) => void;
       }): { requestAccessToken(): void };
       revoke(token: string, done?: () => void): void;
@@ -106,12 +111,13 @@ export function loadGoogleIdentity(): Promise<void> {
 }
 
 // Called synchronously from the click when the script is already loaded, so the popup is not blocked.
-function gisToken(clientId: string, silent: boolean, now: () => number): Promise<SyncToken> {
+function gisToken(clientId: string, silent: boolean, hint: string | null | undefined, now: () => number): Promise<SyncToken> {
   const request = () => new Promise<SyncToken>((resolve, reject) => {
     const client = gis()!.accounts.oauth2.initTokenClient({
       client_id: clientId,
       scope: DRIVE_SCOPE,
       prompt: silent ? '' : 'select_account',
+      ...(hint ? { login_hint: hint } : {}),
       callback: (r) => {
         if (r.error || !r.access_token) reject(new AuthError(r.error ?? 'no token'));
         else resolve({ token: r.access_token, expiresAt: now() + (Number(r.expires_in) || 3600) * 1000 - 60_000 });
@@ -126,10 +132,12 @@ function gisToken(clientId: string, silent: boolean, now: () => number): Promise
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
 export function createDriveSync(options: DriveSyncOptions): DriveSync {
-  const { clientId, fileName, entries, delayMs = 3000, storage = browserStorage } = options;
+  const {
+    clientId, fileName, entries, delayMs = 3000, storage = browserStorage, autoRenewEveryMs = AUTO_RENEW_EVERY_MS,
+  } = options;
   const now = options.now ?? Date.now;
   const doFetch = options.fetch ?? ((...a: Parameters<typeof fetch>) => fetch(...a));
-  const requestToken = options.requestToken ?? ((silent: boolean) => gisToken(clientId, silent, now));
+  const requestToken = options.requestToken ?? ((silent: boolean, hint?: string | null) => gisToken(clientId, silent, hint, now));
   const revokeToken = options.revokeToken ?? ((token: string) => gis()?.accounts?.oauth2?.revoke(token));
   const metaKey = `${fileName}:sync`;
 
@@ -140,6 +148,7 @@ export function createDriveSync(options: DriveSyncOptions): DriveSync {
   let timer: ReturnType<typeof setTimeout> | null = null;
   let chain: Promise<void> = Promise.resolve();
   let pending: { remote: RemoteDoc; keys: string[] } | null = null;
+  let renewing: Promise<void> | null = null;
   const last: Record<string, string> = {};
   const listeners = new Set<() => void>();
 
@@ -168,7 +177,12 @@ export function createDriveSync(options: DriveSyncOptions): DriveSync {
   async function api(url: string, init: RequestInit = {}): Promise<Response> {
     if (!tokenValid()) throw new AuthError('expired');
     const res = await doFetch(url, { ...init, headers: { ...init.headers, Authorization: `Bearer ${meta.token!.token}` } });
-    if (res.status === 401 || res.status === 403) throw new AuthError(`Drive ${res.status}`);
+    if (res.status === 401) throw new AuthError('Drive 401');
+    if (res.status === 403) {
+      const reason = await res.text().catch(() => '');
+      if (/rateLimit|dailyLimit/i.test(reason)) throw new Error('Drive 403: rate limited');
+      throw new AuthError('Drive 403');
+    }
     if (res.status === 404) throw new MissingFile();
     if (!res.ok) throw new Error(`Drive ${res.status}`);
     return res;
@@ -297,6 +311,30 @@ export function createDriveSync(options: DriveSyncOptions): DriveSync {
     if (state.status !== 'conflict') schedule();
   }
 
+  // Starts inside the click: browsers block the token popup without one.
+  function renew(): Promise<void> {
+    saveMeta({ renewedAt: now() });
+    renewing ??= requestToken(true, meta.email)
+      .then((token) => {
+        if (!meta.connected) { revokeToken(token.token); return undefined; }
+        saveMeta({ token });
+        return run();
+      })
+      .catch(() => {
+        if (meta.connected && !tokenValid()) setState({ status: 'expired' });
+      })
+      .finally(() => { renewing = null; });
+    return renewing;
+  }
+
+  function onClick(event: Event) {
+    if (!meta.connected || renewing || state.status === 'connecting') return;
+    if (meta.token && meta.token.expiresAt - now() > RENEW_BEFORE_MS) return;
+    if (meta.renewedAt !== null && now() - meta.renewedAt < autoRenewEveryMs) return;
+    if ((event.target as Element | null)?.closest?.('[data-hub-sync]')) return;
+    void renew();
+  }
+
   function onVisibility() {
     if (typeof document === 'undefined' || !meta.connected || state.status === 'conflict') return;
     if (document.visibilityState === 'visible') void run();
@@ -327,7 +365,10 @@ export function createDriveSync(options: DriveSyncOptions): DriveSync {
         last[entry.key] = JSON.stringify(entry.read());
         entry.subscribe(() => onLocalChange(entry));
       }
-      if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onVisibility);
+      if (typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', onVisibility);
+        document.addEventListener('click', onClick, true);
+      }
       if (!meta.connected) return;
       setState({ email: meta.email, lastSync: meta.lastSync, status: tokenValid() ? 'syncing' : 'expired' });
       if (!options.requestToken) void loadGoogleIdentity().catch(() => undefined);
@@ -335,10 +376,12 @@ export function createDriveSync(options: DriveSyncOptions): DriveSync {
     },
     async connect() {
       const silent = meta.connected;
+      if (renewing) await renewing;
+      if (silent && tokenValid()) return;
       setState({ status: 'connecting', error: null });
       try {
-        const token = await requestToken(silent);
-        saveMeta({ connected: true, token });
+        const token = await requestToken(silent, meta.email);
+        saveMeta({ connected: true, token, renewedAt: now() });
         if (!meta.email) saveMeta({ email: await fetchEmail() });
         setState({ email: meta.email });
         await run();

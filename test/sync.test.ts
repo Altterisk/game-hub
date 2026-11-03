@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from 'vitest';
 import { createDriveSync, type SyncEntry } from '../src/sync';
 
@@ -147,6 +148,111 @@ describe('createDriveSync', () => {
     const phone = device(drive, clock);
     await phone.sync.connect();
     expect(phone.get()).toEqual({ n: 4 });
+  });
+
+  describe('token renewal', () => {
+    function signedIn(request: (silent: boolean, hint?: string | null) => Promise<{ token: string; expiresAt: number }>, fetch?: typeof globalThis.fetch) {
+      const drive = fakeDrive();
+      const clock = { t: 1000 };
+      let value: unknown = { n: 0 };
+      const calls: { silent: boolean; hint?: string | null }[] = [];
+      const storage = memoryStorage();
+      const sync = createDriveSync({
+        clientId: 'x', fileName: 'site.json', delayMs: 0, storage: () => storage,
+        fetch: fetch ?? drive.fetch, now: () => clock.t, revokeToken: () => undefined,
+        entries: [{
+          key: 'site.data', read: () => value, write: (d) => { value = d; }, subscribe: () => () => undefined,
+        }],
+        requestToken: (silent, hint) => {
+          calls.push({ silent, hint });
+          return request(silent, hint).then((r) => ({ ...r, expiresAt: clock.t + r.expiresAt }));
+        },
+      });
+      sync.start();
+      return { sync, drive, clock, calls, set: (v: unknown) => { value = v; } };
+    }
+    const hour = 3_600_000;
+    const ok = async () => ({ token: 't', expiresAt: hour });
+    const settle = () => new Promise((r) => setTimeout(r, 5));
+
+    const day = 24 * hour;
+
+    it('stays expired until a day after sign-in, then renews on a click for the same account', async () => {
+      const d = signedIn(ok);
+      await d.sync.connect();
+      d.clock.t += hour + 1;
+      await d.sync.syncNow();
+      expect(d.sync.getState().status).toBe('expired');
+      document.body.click();
+      await settle();
+      expect(d.calls).toHaveLength(1);
+      d.clock.t += day;
+      document.body.click();
+      await settle();
+      expect(d.calls.at(-1)).toEqual({ silent: true, hint: 'a@example.com' });
+      expect(d.sync.getState().status).toBe('synced');
+    });
+
+    it('does not renew while the token still has time left', async () => {
+      const d = signedIn(() => ok());
+      await d.sync.connect();
+      d.clock.t += day;
+      await d.sync.connect();
+      expect(d.calls).toHaveLength(2);
+      d.clock.t += hour - 6 * 60_000;
+      document.body.click();
+      await settle();
+      expect(d.calls).toHaveLength(2);
+    });
+
+    it('waits a day after a failed renewal, but connect still works', async () => {
+      let fail = false;
+      const d = signedIn(() => (fail ? Promise.reject(new Error('popup_failed_to_open')) : ok()));
+      await d.sync.connect();
+      fail = true;
+      d.clock.t += day + 1;
+      document.body.click();
+      await settle();
+      expect(d.calls).toHaveLength(2);
+      expect(d.sync.getState().status).toBe('expired');
+      d.clock.t += hour;
+      document.body.click();
+      await settle();
+      expect(d.calls).toHaveLength(2);
+      fail = false;
+      await d.sync.connect();
+      expect(d.calls).toHaveLength(3);
+      expect(d.sync.getState().status).toBe('synced');
+    });
+
+    it('leaves clicks on the sync controls alone', async () => {
+      const d = signedIn(ok);
+      await d.sync.connect();
+      d.clock.t += day + 1;
+      const control = document.createElement('button');
+      control.setAttribute('data-hub-sync', '');
+      document.body.appendChild(control);
+      control.click();
+      control.remove();
+      await settle();
+      expect(d.calls).toHaveLength(1);
+    });
+
+    it('does not treat a rate limit as an expired sign-in', async () => {
+      const drive = fakeDrive();
+      let limited = false;
+      const fetch = ((input: RequestInfo | URL, init?: RequestInit) => (limited
+        ? Promise.resolve(new Response(JSON.stringify({ error: { errors: [{ reason: 'userRateLimitExceeded' }] } }), { status: 403 }))
+        : drive.fetch(input, init))) as typeof globalThis.fetch;
+      const d = signedIn(ok, fetch);
+      await d.sync.connect();
+      limited = true;
+      await d.sync.syncNow();
+      expect(d.sync.getState().status).toBe('error');
+      limited = false;
+      await d.sync.syncNow();
+      expect(d.sync.getState().status).toBe('synced');
+    });
   });
 
   it('forgets the account on disconnect', async () => {
