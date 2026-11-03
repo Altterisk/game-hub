@@ -105,16 +105,16 @@ const PSEUDO = {
   _invalid: '&[aria-invalid=true]', _checked: '&[data-checked]', _indeterminate: '&[data-indeterminate]',
   _selected: '&[aria-selected=true]', _expanded: '&[aria-expanded=true]', _placeholder: '&::placeholder', _before: '&::before', _after: '&::after',
   _first: '&:first-of-type', _last: '&:last-of-type', _even: '&:nth-of-type(even)', _odd: '&:nth-of-type(odd)',
-  _groupHover: '[role=group]:hover &', _activeLink: '&[aria-current=page]', _notFirst: '&:not(:first-of-type)',
+  _groupHover: ':is([role=group], [data-group]):hover &', _activeLink: '&[aria-current=page]', _notFirst: '&:not(:first-of-type)',
   _notLast: '&:not(:last-of-type)', _vertical: '&[data-orientation=vertical]', _horizontal: '&[data-orientation=horizontal]',
-  _groupFocusVisible: '[role=group]:focus-visible &', _peerFocusVisible: '[data-peer]:focus-visible ~ &',
+  _groupFocusVisible: ':is([role=group], [data-group]):focus-visible &', _peerFocusVisible: '[data-peer]:focus-visible ~ &',
   _empty: '&:empty', _pressed: '&[aria-pressed=true]', _invalidFocus: '&[aria-invalid=true]:focus',
 };
 
 // Pseudo-state style props (`_hover={{ bg }}`) → var + class; only for props states usually change.
 const STATES = {
   h: '&:hover', f: '&:focus', fv: '&:focus-visible', a: '&:active, &[data-active]', d: '&:disabled, &[aria-disabled=true], &[data-disabled]',
-  ph: '&::placeholder', gh: '[role=group]:hover &', sel: '&[aria-selected=true], &[aria-pressed=true]', ck: '&[data-checked]',
+  ph: '&::placeholder', gh: ':is([role=group], [data-group]):hover &', sel: '&[aria-selected=true], &[aria-pressed=true]', ck: '&[data-checked]',
 };
 const STATE_PROPS = new Set(['bg', 'bgColor', 'color', 'borderColor', 'opacity', 'boxShadow', 'textDecoration', 'transform', 'filter',
   'outline', 'outlineColor', 'cursor', 'borderWidth', 'zIndex', 'fontWeight', 'textUnderlineOffset', 'borderBottomColor', 'fill', 'stroke',

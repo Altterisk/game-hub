@@ -340,7 +340,8 @@
 .hub-footer__legal a { color: var(--hub-text-subtle); text-decoration: underline; }
 
 .hub-shell { min-height: 100vh; display: flex; flex-direction: column; }
-.hub-shell__main { flex: 1; outline: none; }
+/* Keeps the footer below the fold while a page's data loads, so its arrival shifts nothing on screen. */
+.hub-shell__main { flex: 1; outline: none; min-height: calc(100vh - var(--hub-bar-height)); }
 .hub-shell__content {
   max-width: var(--hub-max-width);
   margin: 0 auto;
