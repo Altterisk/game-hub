@@ -317,6 +317,8 @@ function compile(style, selectors, resolver, out, media = '') {
 function cssVarValue(raw, resolver) {
   if (typeof raw !== 'string') return String(raw);
   if (raw.startsWith('colors.')) return resolver.color(raw);
+  const scaled = /^(sizes|space|radii|fontSizes|lineHeights|borderWidths)\.(.+)$/.exec(raw);
+  if (scaled) return resolver.one(scaled[2], scaled[1]);
   if (/^[a-zA-Z]+\.\d+$/.test(raw)) return resolver.color(raw);
   return raw;
 }
