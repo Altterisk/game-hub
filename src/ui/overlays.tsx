@@ -106,6 +106,7 @@ export const Tooltip = forwardRef<any, Omit<UIProps, 'aria-label'> & ThemingProp
       onPointerLeave: (e: any) => { (children as ReactElement<any>).props.onPointerLeave?.(e); leave(); },
       onFocus: (e: any) => { (children as ReactElement<any>).props.onFocus?.(e); enter(e); },
       onBlur: (e: any) => { (children as ReactElement<any>).props.onBlur?.(e); leave(); },
+      onClick: (e: any) => { (children as ReactElement<any>).props.onClick?.(e); if (closeOnClick) leave(); },
     });
   const { domProps } = useUIProps(props, cx('ui-tooltip', themeClasses('Tooltip', 'tooltip', { size, variant, colorScheme })));
   return (

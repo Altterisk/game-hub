@@ -27,6 +27,14 @@ describe('viewer controls', () => {
     expect(onChange).toHaveBeenCalledWith('b');
   });
 
+  it('an option with a hint still switches', () => {
+    const onChange = vi.fn();
+    wrap(<SegmentedControl value="a" onChange={onChange}
+      options={[{ value: 'a', label: 'A', title: 'First' }, { value: 'b', label: 'B', title: 'Second' }]} />);
+    fireEvent.click(screen.getByRole('button', { name: 'B' }));
+    expect(onChange).toHaveBeenCalledWith('b');
+  });
+
   it('spells out toggle state with translatable labels', () => {
     const onChange = vi.fn();
     wrap(<ToggleRow label="Zones" value={false} onChange={onChange} labels={{ on: '켬', off: '끔' }} />);

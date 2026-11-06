@@ -195,6 +195,13 @@ describe('overlays', () => {
     vi.useRealTimers();
   });
 
+  it('a tooltip keeps its child clickable', () => {
+    const onClick = vi.fn();
+    render(<Tooltip label="Hint"><button type="button" onClick={onClick}>Press</button></Tooltip>);
+    fireEvent.click(screen.getByRole('button', { name: 'Press' }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
   it('tooltip shows on hover', async () => {
     vi.useFakeTimers();
     render(<Tooltip label="Hint"><button type="button">Hover</button></Tooltip>);
