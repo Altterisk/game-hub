@@ -31,6 +31,7 @@
 [data-game="lo"] { --hub-accent: #f2727f; }
 [data-game="mad"] { --hub-accent: #f6c445; }
 [data-game="taimanin"] { --hub-accent: #e879f9; }
+[data-game="oshiro"] { --hub-accent: #34d399; }
 
 :root, [data-game] {
   --hub-accent-soft: color-mix(in srgb, var(--hub-accent) 14%, transparent);

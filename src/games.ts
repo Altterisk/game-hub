@@ -1,4 +1,4 @@
-export type GameId = 'aigis' | 'lo' | 'mad' | 'taimanin';
+export type GameId = 'aigis' | 'lo' | 'mad' | 'taimanin' | 'oshiro';
 
 export interface GameSection {
   label: string;
@@ -100,6 +100,20 @@ export const GAMES: Game[] = [
       { label: 'Story', path: '/story' },
       { label: 'Quests', path: '/quests' },
       { label: 'Buffs', path: '/buffs' },
+    ],
+  },
+  {
+    id: 'oshiro',
+    name: 'Oshiro Database',
+    title: 'Shiro Project:RE',
+    tagline: 'Castle girls, specialties, stratagems and abilities',
+    url: 'https://oshiro.altterisk.cc',
+    icon: '/icons/oshiro.png',
+    accent: '#34d399',
+    source: 'https://github.com/anyabot/Oshiro-Database',
+    rights: 'DMM GAMES',
+    sections: [
+      { label: 'Units', path: '/units' },
     ],
   },
 ];

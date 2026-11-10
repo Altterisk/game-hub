@@ -9,6 +9,8 @@
 
 [data-game="taimanin"] { --ui-c-accent-50: #fceffe; --ui-c-accent-100: #f8d7fd; --ui-c-accent-200: #f2b5fc; --ui-c-accent-300: #e879f9; --ui-c-accent-400: #cd6cde; --ui-c-accent-500: #b15fc1; --ui-c-accent-600: #904f9f; --ui-c-accent-700: #6e3f7d; --ui-c-accent-800: #4d2f5b; --ui-c-accent-900: #2e203b; }
 
+[data-game="oshiro"] { --ui-c-accent-50: #e7faf3; --ui-c-accent-100: #c2f2e0; --ui-c-accent-200: #8fe7c7; --ui-c-accent-300: #34d399; --ui-c-accent-400: #2fbb89; --ui-c-accent-500: #2aa279; --ui-c-accent-600: #248565; --ui-c-accent-700: #1d6752; --ui-c-accent-800: #174a3e; --ui-c-accent-900: #122e2c; }
+
 /* global */
 body { font-family: Inter, "Noto Sans JP", "Noto Sans KR", Pretendard, "Hiragino Sans", Meiryo, system-ui, sans-serif; color: #eceef4; background: #0b0f17; transition-property: background-color; transition-duration: 200ms; line-height: 1.5; overflow-x: hidden; text-rendering: optimizeLegibility; }
 *::placeholder { color: #80899b; }
@@ -188,6 +190,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 [data-game="taimanin"] .ui-badge.ui-badge--subtle-accent { --badge-bg: rgba(242, 181, 252, 0.16); --badge-color: var(--ui-c-accent-200); }
 [data-game="taimanin"] .ui-badge.ui-badge--outline-accent { --badge-color: rgba(242, 181, 252, 0.8); --badge-shadow: inset 0 0 0px 1px var(--badge-color); }
 
+[data-game="oshiro"] .ui-badge.ui-badge--solid-accent { --badge-bg: rgba(42, 162, 121, 0.6); --badge-color: var(--ui-c-whiteAlpha-800); }
+[data-game="oshiro"] .ui-badge.ui-badge--subtle-accent { --badge-bg: rgba(143, 231, 199, 0.16); --badge-color: var(--ui-c-accent-200); }
+[data-game="oshiro"] .ui-badge.ui-badge--outline-accent { --badge-color: rgba(143, 231, 199, 0.8); --badge-shadow: inset 0 0 0px 1px var(--badge-color); }
+
 /* Button */
 .ui-button:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-c-accent-300) 28%, transparent); }
 .ui-button:disabled, .ui-button[aria-disabled=true], .ui-button[data-disabled] { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
@@ -365,6 +371,21 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 [data-game="taimanin"] .ui-button.ui-button--link-accent:hover { text-decoration: underline; }
 [data-game="taimanin"] .ui-button.ui-button--link-accent:active, [data-game="taimanin"] .ui-button.ui-button--link-accent[data-active] { color: var(--ui-c-accent-500); }
 [data-game="taimanin"] .ui-button.ui-button--link-accent { padding: 0; height: auto; line-height: normal; vertical-align: baseline; color: var(--ui-c-accent-200); }
+
+[data-game="oshiro"] .ui-button.ui-button--ghost-accent:hover, [data-game="oshiro"] .ui-button.ui-button--outline-accent:hover { background: rgba(143, 231, 199, 0.12); }
+[data-game="oshiro"] .ui-button.ui-button--ghost-accent:active, [data-game="oshiro"] .ui-button.ui-button--ghost-accent[data-active], [data-game="oshiro"] .ui-button.ui-button--outline-accent:active, [data-game="oshiro"] .ui-button.ui-button--outline-accent[data-active] { background: rgba(143, 231, 199, 0.24); }
+[data-game="oshiro"] .ui-button.ui-button--ghost-accent { color: var(--ui-c-accent-200); background: transparent; }
+[data-game="oshiro"] .chakra-button__group[data-attached][data-orientation=horizontal] > .ui-button.ui-button--outline-accent:not(:last-of-type) { margin-inline-end: -1px; }
+[data-game="oshiro"] .chakra-button__group[data-attached][data-orientation=vertical] > .ui-button.ui-button--outline-accent:not(:last-of-type) { margin-bottom: -1px; }
+[data-game="oshiro"] .ui-button.ui-button--outline-accent { border: 1px solid; border-color: currentColor; color: var(--ui-c-accent-200); background: transparent; }
+[data-game="oshiro"] .ui-button.ui-button--solid-accent:hover:disabled, [data-game="oshiro"] .ui-button.ui-button--solid-accent:hover[aria-disabled=true], [data-game="oshiro"] .ui-button.ui-button--solid-accent:hover[data-disabled] { background: var(--ui-c-accent-200); }
+[data-game="oshiro"] .ui-button.ui-button--solid-accent:hover { background: var(--ui-c-accent-300); }
+[data-game="oshiro"] .ui-button.ui-button--solid-accent:active, [data-game="oshiro"] .ui-button.ui-button--solid-accent[data-active] { background: var(--ui-c-accent-400); }
+[data-game="oshiro"] .ui-button.ui-button--solid-accent { background: var(--ui-c-accent-200); color: var(--ui-c-gray-800); }
+[data-game="oshiro"] .ui-button.ui-button--link-accent:hover:disabled, [data-game="oshiro"] .ui-button.ui-button--link-accent:hover[aria-disabled=true], [data-game="oshiro"] .ui-button.ui-button--link-accent:hover[data-disabled] { text-decoration: none; }
+[data-game="oshiro"] .ui-button.ui-button--link-accent:hover { text-decoration: underline; }
+[data-game="oshiro"] .ui-button.ui-button--link-accent:active, [data-game="oshiro"] .ui-button.ui-button--link-accent[data-active] { color: var(--ui-c-accent-500); }
+[data-game="oshiro"] .ui-button.ui-button--link-accent { padding: 0; height: auto; line-height: normal; vertical-align: baseline; color: var(--ui-c-accent-200); }
 
 /* Card */
 .ui-card__container { --card-bg: var(--ui-c-gray-800); background-color: var(--card-bg); box-shadow: var(--card-shadow); border-radius: 18px; color: #eceef4; border-width: 1px; border-color: #262e3e; background: #121825; }
@@ -863,6 +884,22 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 [data-game="taimanin"] .ui-tabs__tab.ui-tabs--solid-rounded-accent[aria-selected=true] { --tabs-color: var(--ui-c-gray-800); --tabs-bg: var(--ui-c-accent-300); }
 [data-game="taimanin"] .ui-tabs__tab.ui-tabs--solid-rounded-accent { border-radius: 9999px; font-weight: 600; --tabs-color: inherit; color: var(--tabs-color); background: var(--tabs-bg); }
 
+[data-game="oshiro"] .ui-tabs__tablist.ui-tabs--line-accent { border-bottom: 2px solid; border-color: inherit; }
+[data-game="oshiro"] .ui-tabs__tab.ui-tabs--line-accent[aria-selected=true] { --tabs-color: var(--ui-c-accent-300); border-color: currentColor; }
+[data-game="oshiro"] .ui-tabs__tab.ui-tabs--line-accent:active, [data-game="oshiro"] .ui-tabs__tab.ui-tabs--line-accent[data-active] { --tabs-bg: var(--ui-c-whiteAlpha-300); }
+[data-game="oshiro"] .ui-tabs__tab.ui-tabs--line-accent:disabled:active, [data-game="oshiro"] .ui-tabs__tab.ui-tabs--line-accent:disabled[data-active], [data-game="oshiro"] .ui-tabs__tab.ui-tabs--line-accent[aria-disabled=true]:active, [data-game="oshiro"] .ui-tabs__tab.ui-tabs--line-accent[aria-disabled=true][data-active], [data-game="oshiro"] .ui-tabs__tab.ui-tabs--line-accent[data-disabled]:active, [data-game="oshiro"] .ui-tabs__tab.ui-tabs--line-accent[data-disabled][data-active] { background: none; }
+[data-game="oshiro"] .ui-tabs__tab.ui-tabs--line-accent { border-bottom: 2px solid; border-color: transparent; margin-bottom: -2px; color: var(--tabs-color); background: var(--tabs-bg); }
+[data-game="oshiro"] .ui-tabs__tab.ui-tabs--enclosed-accent[aria-selected=true] { --tabs-color: var(--ui-c-accent-300); --tabs-border-color: var(--ui-c-gray-800); border-color: inherit; border-bottom-color: var(--tabs-border-color); }
+[data-game="oshiro"] .ui-tabs__tab.ui-tabs--enclosed-accent { border-top-left-radius: 10px; border-top-right-radius: 10px; border: 1px solid; border-color: transparent; margin-bottom: -1px; --tabs-border-color: transparent; color: var(--tabs-color); }
+[data-game="oshiro"] .ui-tabs__tablist.ui-tabs--enclosed-accent, [data-game="oshiro"] .ui-tabs__tablist.ui-tabs--enclosed-colored-accent { margin-bottom: -1px; border-bottom: 1px solid; border-color: inherit; }
+[data-game="oshiro"] .ui-tabs__tab.ui-tabs--enclosed-colored-accent:not(:last-of-type) { margin-inline-end: -1px; }
+[data-game="oshiro"] .ui-tabs__tab.ui-tabs--enclosed-colored-accent[aria-selected=true] { --tabs-bg: var(--ui-c-gray-800); --tabs-color: var(--ui-c-accent-300); border-color: inherit; border-top-color: currentColor; border-bottom-color: transparent; }
+[data-game="oshiro"] .ui-tabs__tab.ui-tabs--enclosed-colored-accent { border: 1px solid; border-color: inherit; --tabs-bg: var(--ui-c-whiteAlpha-50); margin-bottom: -1px; color: var(--tabs-color); background: var(--tabs-bg); }
+[data-game="oshiro"] .ui-tabs__tab.ui-tabs--soft-rounded-accent[aria-selected=true] { color: #1d6752; background: #c2f2e0; }
+[data-game="oshiro"] .ui-tabs__tab.ui-tabs--soft-rounded-accent { border-radius: 9999px; font-weight: 600; color: var(--ui-c-gray-600); }
+[data-game="oshiro"] .ui-tabs__tab.ui-tabs--solid-rounded-accent[aria-selected=true] { --tabs-color: var(--ui-c-gray-800); --tabs-bg: var(--ui-c-accent-300); }
+[data-game="oshiro"] .ui-tabs__tab.ui-tabs--solid-rounded-accent { border-radius: 9999px; font-weight: 600; --tabs-color: inherit; color: var(--tabs-color); background: var(--tabs-bg); }
+
 /* Tag */
 .ui-tag__container:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-c-accent-300) 28%, transparent); }
 .ui-tag__container { font-weight: 500; line-height: 1.2; outline: 0; color: var(--badge-color); background: var(--badge-bg); box-shadow: var(--badge-shadow); border-radius: 10px; }
@@ -925,6 +962,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 [data-game="taimanin"] .ui-tag__container.ui-tag--subtle-accent { --badge-bg: rgba(242, 181, 252, 0.16); --badge-color: var(--ui-c-accent-200); }
 [data-game="taimanin"] .ui-tag__container.ui-tag--solid-accent { --badge-bg: rgba(177, 95, 193, 0.6); --badge-color: var(--ui-c-whiteAlpha-800); }
 [data-game="taimanin"] .ui-tag__container.ui-tag--outline-accent { --badge-color: rgba(242, 181, 252, 0.8); --badge-shadow: inset 0 0 0px 1px var(--badge-color); }
+
+[data-game="oshiro"] .ui-tag__container.ui-tag--subtle-accent { --badge-bg: rgba(143, 231, 199, 0.16); --badge-color: var(--ui-c-accent-200); }
+[data-game="oshiro"] .ui-tag__container.ui-tag--solid-accent { --badge-bg: rgba(42, 162, 121, 0.6); --badge-color: var(--ui-c-whiteAlpha-800); }
+[data-game="oshiro"] .ui-tag__container.ui-tag--outline-accent { --badge-color: rgba(143, 231, 199, 0.8); --badge-shadow: inset 0 0 0px 1px var(--badge-color); }
 
 /* Textarea */
 .ui-textarea:disabled, .ui-textarea[aria-disabled=true], .ui-textarea[data-disabled] { opacity: 0.4; cursor: not-allowed; }

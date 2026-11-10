@@ -14,6 +14,7 @@ another.
 | LOMapR | anyabot/LOMapR | lo.altterisk.cc | `#f2727f` |
 | MAD Viewer | anyabot/MAD-Viewer | mad.altterisk.cc | `#f6c445` |
 | Taimanin RPGX Database | anyabot/Taimanin-RPGX-Database | taimanin.altterisk.cc | `#e879f9` |
+| Oshiro Database | anyabot/Oshiro-Database | oshiro.altterisk.cc | `#34d399` |
 
 ## What's in it
 
