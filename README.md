@@ -267,6 +267,27 @@ From a CommonJS script, load it with `await import('@altterisk/game-hub/build')`
 - Root: `StoryLines({ lines })` (place, narration, choice, options with branches, speaker rows;
   the site maps its data to `StoryLineView` and renders text) and
   `VoiceLineList({ items, playing, onPlay, onStop })`.
+- Root, scene player parts (v0.9.0, styled by `components.css` `.hub-scene-*`). The site draws
+  its own picture layers inside the frame and assembles the rest:
+  - `useSceneStepper({ count, start, onEnd, onClose, autoDelay, ready, keys })` → `at`, `go`,
+    `next`, `back`, `atEnd`, `auto`, `setAuto`. Keys on the window: → / Space / Enter next
+    (Space/Enter not on a focused button), ← back, Home, End, Escape → `onClose` (not while
+    fullscreen). Auto waits `autoDelay(at)` ms per step, held while `ready` is false.
+  - `<SceneFrame aspect onAdvance>`: the stage at a fixed CSS aspect ratio, scaled to its
+    width (`container-type: inline-size`, so children can size in `cqw`); a click advances.
+  - `<SceneTextBox lines at allLines hidden lang>`: one `SceneLine | null` per step
+    (`{ name, text, lang }`, `null` = no box on that step). `allLines`: every line is in the
+    box from the start, stacked at opacity 0 but the current one, and never re-rendered (only
+    the `is-on` class moves), so page translators (Chrome, Edge) translate the whole scene up
+    front. Otherwise only the current line, keyed so each is a fresh element. `lang` defaults
+    to `ja`.
+  - `sceneTextSetting(key, initial = true)` → the saved all-lines choice (`createSetting`;
+    reads earlier `true`/`false` and bare `"1"`/`"0"`).
+  - `<SceneControls stepper count slider allLines onAllLines theater onTheater onClose labels>`:
+    Back, position slider, Next, `n / count`, Auto, text mode, `children` (the site's own
+    buttons), Theater, Close; `translate="no"`.
+  - `useSceneTheater(ref)` → `[on, toggle]`: element fullscreen where available (landscape
+    lock on phones), else `on` for a full-window overlay the site styles.
 ## UI kit (`/ui`, v0.6.0): Chakra-free components
 
 `@altterisk/game-hub/ui` replaces Chakra UI v2 with the same component names and props,

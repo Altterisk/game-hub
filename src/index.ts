@@ -23,3 +23,7 @@ export {
   type SiteShellProps, type NavMenuItem, type GateProps, type ErrorBoundaryLabels, type Placement,
 } from './shell.js';
 export { StoryLines, VoiceLineList, type StoryLineView, type VoiceLineItem, type VoiceLineLabels } from './story.js';
+export {
+  SceneFrame, SceneTextBox, SceneControls, useSceneStepper, useSceneTheater, sceneTextSetting,
+  type SceneLine, type SceneStepper, type SceneStepperOptions, type SceneControlsLabels,
+} from './scene.js';
